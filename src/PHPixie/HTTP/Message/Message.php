@@ -1,71 +1,50 @@
 <?php
-namespace Phly\Http;
+namespace PHPixie\HTTP\Message;
 
-use InvalidArgumentException;
 use Psr\Http\Message\StreamableInterface;
+use Psr\Http\Message\MessageInterface;
 
-/**
- * Trait implementing the various methods defined in
- * \Psr\Http\Message\MessageInterface.
- *
- * @link https://github.com/php-fig/http-message/tree/master/src/MessageInterface.php
- */
-trait MessageTrait
+abstract class Message implements MessageInterface
 {
-    /**
-     * List of all registered headers, as key => array of values.
-     *
-     * @var array
-     */
-    protected $headers = [];
-
-    /**
-     * Map of normalized header name to original name used to register header.
-     *
-     * @var array
-     */
-    protected $headerNames = [];
-
-    /**
-     * @var string
-     */
-    private $protocol = '1.1';
-
-    /**
-     * @var StreamableInterface
-     */
-    private $stream;
-
-    /**
-     * Retrieves the HTTP protocol version as a string.
-     *
-     * The string MUST contain only the HTTP version number (e.g., "1.1", "1.0").
-     *
-     * @return string HTTP protocol version.
-     */
+    protected $protocol;
+    protected $headers;
+    protected $stream;
+    
+    protected $headerNames = array();
+    
+    protected function requireHeaders();
+    protected function requireProtocolVersion();
+    protected function requireStream();
+    
     public function getProtocolVersion()
     {
+        $this->requireProtocolVersion();
         return $this->protocolVersion;
     }
 
     public function withProtocolVersion($version)
     {
-        $this->checkUpdate('protocolVersion', $version);
+        $new = clone $this;
+        $new->protocolVersion = $version;
+        return $new;
     }
 
     public function getHeaders()
     {
+        $this->requireHeaders();
         return $this->headers;
     }
 
     public function hasHeader($header)
     {
-        $header = strtolower($header);
-        return array_key_exists($header, $this->headerNames, true);
+        $this->requireHeaders();
+        $lower = strtolower($header);
+        return array_key_exists($lower, $this->headerNames, true);
     }
 
     public function getHeader($header)
     {
+        $this->requireHeaders();
         $lines = $this->getHeaderLines($header);
         
         if (count($lines) === 0) {
@@ -77,66 +56,90 @@ trait MessageTrait
 
     public function getHeaderLines($header)
     {
-        if (!$this->hasHeader($header)) {
+        $this->requireHeaders();
+        $lower = strtolower($header);
+        
+        if(!array_key_exists($lower, $this->headerNames, true)) {
             return array();
         }
-
-        $header = $this->headerNames[strtolower($header)];
-        $value = $this->headers[$header];
-        return $value;
+        
+        $normalized = $this->headerNames[$lower];
+        return $this->headers[$normalized];
     }
 
     public function withHeader($header, $value)
     {
+        return $this->modifyHeader($header, $value);
+    }
+
+    public function withAddedHeader($header, $value)
+    {
+        return $this->modifyHeader($header, $value, true);
+    }
+    
+    protected function modifyHeader($header, $value, $append = false)
+    {
+        $this->requireHeaders();
         if (!is_array($value)) {
             $value = array($value);
         }
         
         $headers = $this->headers;
         $lower = strtolower($header);
+        
         if(array_key_exists($lower, $this->headerNames, true)) {
             $normalized = $this->headerNames[$lower];
-            unset($headers[$normalized]);
+            $currentValue = $headers[$normalized];
+            
+            if($append) {
+                $value = array_merge($currentValue, $value);
+                $header = $normalized;
+            }else{
+                unset($headers[$normalized]);
+            }
+            
+            if($currentValue === $value) {
+                return $this;
+            }
         }
         
         $headers[$header] = $value;
         
-        return $this->update('headers', $headers);
-    }
-
-    public function withAddedHeader($header, $value)
-    {
-        if (!is_array($value)) {
-            $value = array($value);
-        }
-
-        $lines = $this->getHeaderLines($header);
-        foreach($value as $line) {
-            $lines[]= $line;
-        }
+        $new = clone $this;
+        $new->headers = $headers;
+        $new->headerNames[$lower] = $header;
         
-        return $this->withHeader($header, $lines);
+        return new;
     }
 
     public function withoutHeader($header)
     {
-        $header = strtolower($header);
-        $normalized = $this->headerNames[$header];
+        $this->requireHeaders();
+        $lower = strtolower($header);
         
-        $headers = $this->headers;
-        unset($headers[$normalized]);
+        if(array_key_exists($lower, $this->headerNames, true)) {
+            return $this;
+        }
         
-        return $this->update('headers', $headers);
+        $normalized = $this->headerNames[$lower];
+        
+        $new = clone $this;
+        unset($new->headers[$normalized]);
+        unset($new->headerNames[$lower]);
+        
+        return new;
     }
 
     public function getBody()
     {
-        return $this->stream;
+        $this->requireBody();
+        return $this->body;
     }
 
     public function withBody(StreamableInterface $body)
     {
-        return $this->update('body', $body);
+        $new = clone $this;
+        $new->body = $body;
+        return $new;
     }
-    
 }
