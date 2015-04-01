@@ -1,20 +1,25 @@
 <?php
-namespace PHPixie\HTTP\Message;
+
+namespace PHPixie\HTTP\Messages;
 
 use Psr\Http\Message\StreamableInterface;
 use Psr\Http\Message\MessageInterface;
 
 abstract class Message implements MessageInterface
 {
-    protected $protocol;
+    protected $protocolVersion;
     protected $headers;
-    protected $stream;
+    protected $body;
     
     protected $headerNames = array();
     
-    protected function requireHeaders();
-    protected function requireProtocolVersion();
-    protected function requireStream();
+    protected function requireHeaders()
+    {
+        $this->populateHeaderNames();
+    }
+    
+    protected function requireProtocolVersion(){}
+    protected function requireBody(){}
     
     public function getProtocolVersion()
     {
@@ -109,7 +114,7 @@ abstract class Message implements MessageInterface
         $new->headers = $headers;
         $new->headerNames[$lower] = $header;
         
-        return new;
+        return $new;
     }
 
     public function withoutHeader($header)
@@ -127,7 +132,7 @@ abstract class Message implements MessageInterface
         unset($new->headers[$normalized]);
         unset($new->headerNames[$lower]);
         
-        return new;
+        return $new;
     }
 
     public function getBody()
