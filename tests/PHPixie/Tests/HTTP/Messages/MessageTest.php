@@ -34,7 +34,7 @@ abstract class MessageTest extends \PHPixie\Test\Testcase
      */
     public function testConstruct()
     {
-        $this->assertInstance($this->message, array(), true);
+        $this->assertInstance($this->message, array(), false);
     }
     
     /**
@@ -63,9 +63,97 @@ abstract class MessageTest extends \PHPixie\Test\Testcase
         ));
     }
     
-    protected function assertInstance($instance, $overrides = array(), $same = false)
+    /**
+     * @covers ::getProtocolVersion
+     * @covers ::withProtocolVersion
+     * @covers ::<protected>
+     */
+    public function testProtocolVersion()
     {
-        $this->assertSame($same, $instance === $this->message);
+        $protocolVersion = '1.0';
+        $new = $this->message->withProtocolVersion($protocolVersion);
+        
+        $this->assertInstance($new, array(
+            'getProtocolVersion' => $protocolVersion
+        ));
+    }
+    
+    /**
+     * @covers ::getHeaders
+     * @covers ::hasHeader
+     * @covers ::getHeader
+     * @covers ::getHeaderLines
+     * @covers ::<protected>
+     */
+    public function testGetHeader()
+    {
+        $this->assertSame($this->headers, $this->message->getHeaders());
+        
+        foreach($this->headers as $name => $lines) {
+            $this->assertSame(true, $this->message->hasHeader($name));
+            $this->assertSame(implode(',', $lines), $this->message->getHeader($name));
+            $this->assertSame($lines, $this->message->getHeaderLines($name));
+        }
+        
+        $this->assertSame(false, $this->message->hasHeader('Pixies'));
+        $this->assertSame(null, $this->message->getHeader('Pixies'));
+        $this->assertSame(array(), $this->message->getHeaderLines('Pixies'));
+    }
+    
+    /**
+     * @covers ::withHeader
+     * @covers ::<protected>
+     */
+    public function testWithHeader()
+    {
+        $new = $this->message->withHeader('fairy', 'Stella');
+        
+        $headers = $this->headers;
+        unset($headers['Fairy']);
+        $headers['fairy'] = array('Stella');
+        
+        $this->assertInstance($new, array(
+            'getHeaders' => $headers
+        ));
+    }
+    
+    /**
+     * @covers ::withAddedHeader
+     * @covers ::<protected>
+     */
+    public function testWithAddedHeader()
+    {
+        $new = $this->message->withAddedHeader('fairy', 'Stella');
+        
+        $headers = $this->headers;
+        $headers['Fairy'][] = 'Stella';
+        
+        $this->assertInstance($new, array(
+            'getHeaders' => $headers
+        ));
+    }
+
+    /**
+     * @covers ::withoutHeader
+     * @covers ::<protected>
+     */
+    public function testWithoutHeader()
+    {
+        $new = $this->message->withoutHeader('Name');
+        
+        $headers = $this->headers;
+        unset($headers['Name']);
+        
+        $this->assertInstance($new, array(
+            'getHeaders' => $headers
+        ));
+    }
+    
+    protected function assertInstance($instance, $overrides = array(), $assertNotSame = true)
+    {
+        if($assertNotSame) {
+            $this->assertNotSame($this->message, $instance);
+        }
         
         $methods = array_merge($this->getMethodMap(), $overrides);
         

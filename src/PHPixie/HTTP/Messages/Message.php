@@ -11,15 +11,9 @@ abstract class Message implements MessageInterface
     protected $headers;
     protected $body;
     
+    protected $processedHeaders = false;
+    
     protected $headerNames = array();
-    
-    protected function requireHeaders()
-    {
-        $this->populateHeaderNames();
-    }
-    
-    protected function requireProtocolVersion(){}
-    protected function requireBody(){}
     
     public function getProtocolVersion()
     {
@@ -44,7 +38,7 @@ abstract class Message implements MessageInterface
     {
         $this->requireHeaders();
         $lower = strtolower($header);
-        return array_key_exists($lower, $this->headerNames, true);
+        return array_key_exists($lower, $this->headerNames);
     }
 
     public function getHeader($header)
@@ -64,7 +58,7 @@ abstract class Message implements MessageInterface
         $this->requireHeaders();
         $lower = strtolower($header);
         
-        if(!array_key_exists($lower, $this->headerNames, true)) {
+        if(!array_key_exists($lower, $this->headerNames)) {
             return array();
         }
         
@@ -92,7 +86,7 @@ abstract class Message implements MessageInterface
         $headers = $this->headers;
         $lower = strtolower($header);
         
-        if(array_key_exists($lower, $this->headerNames, true)) {
+        if(array_key_exists($lower, $this->headerNames)) {
             $normalized = $this->headerNames[$lower];
             $currentValue = $headers[$normalized];
             
@@ -101,10 +95,6 @@ abstract class Message implements MessageInterface
                 $header = $normalized;
             }else{
                 unset($headers[$normalized]);
-            }
-            
-            if($currentValue === $value) {
-                return $this;
             }
         }
         
@@ -121,10 +111,6 @@ abstract class Message implements MessageInterface
     {
         $this->requireHeaders();
         $lower = strtolower($header);
-        
-        if(array_key_exists($lower, $this->headerNames, true)) {
-            return $this;
-        }
         
         $normalized = $this->headerNames[$lower];
         
@@ -146,5 +132,40 @@ abstract class Message implements MessageInterface
         $new = clone $this;
         $new->body = $body;
         return $new;
+    }
+    
+    protected function populateHeaderNames()
+    {
+        $headers = array_keys($this->headers);
+        foreach($headers as $header) {
+            $this->headerNames[strtolower($header)] = $header;
+        }
+    }
+    
+    protected function validateHeaders($headers)
+    {
+        foreach($headers as $name => $lines) {
+            if(empty($lines)) {
+                throw new \PHPixie\HTTP\Exception("Header values for '$name' are empty");
+            }
+        }
+    }
+    
+    protected function requireHeaders()
+    {
+        if(!$this->processedHeaders) {
+            $this->populateHeaderNames();
+            $this->processedHeaders = true;
+        }
+    }
+    
+    protected function requireProtocolVersion()
+    {
+    
+    }
+    
+    protected function requireBody()
+    {
+    
     }
 }
