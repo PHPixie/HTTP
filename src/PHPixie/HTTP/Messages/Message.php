@@ -4,6 +4,7 @@ namespace PHPixie\HTTP\Messages;
 
 use Psr\Http\Message\StreamableInterface;
 use Psr\Http\Message\MessageInterface;
+use InvalidArgumentException;
 
 abstract class Message implements MessageInterface
 {
@@ -146,7 +147,7 @@ abstract class Message implements MessageInterface
     {
         foreach($headers as $name => $lines) {
             if(empty($lines)) {
-                throw new \PHPixie\HTTP\Exception("Header values for '$name' are empty");
+                throw new InvalidArgumentException("Header values for '$name' are empty");
             }
         }
     }

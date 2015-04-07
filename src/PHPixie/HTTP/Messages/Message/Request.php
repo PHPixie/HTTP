@@ -1,11 +1,14 @@
 <?php
-namespace PHPixie\HTTP\Message;
+namespace PHPixie\HTTP\Messages\Message;
 
 use Psr\Http\Message\RequestInterface;
+use Psr\Http\Message\UriInterface;
+use InvalidArgumentException;
 
-class Request implements RequestInterface
+class Request extends    \PHPixie\HTTP\Messages\Message
+              implements RequestInterface
 {
-    protected const $validMethods = [
+    protected $validMethods = array(
         'CONNECT',
         'DELETE',
         'GET',
@@ -15,14 +18,9 @@ class Request implements RequestInterface
         'POST',
         'PUT',
         'TRACE',
-    ];
+    );
     
-    protected $message;
-    
-    public function __construct($message)
-    {
-        $this->message = $message;
-    }
+    protected $requestTarget;
     
     public function getRequestTarget()
     {
@@ -30,25 +28,26 @@ class Request implements RequestInterface
             return $this->requestTarget;
         }
         
+        $this->requireUri();
+        
         if ($this->uri === null) {
             return '/';
         }
         
         $target = $this->uri->getPath();
         
-        if ($this->uri->getQuery()) {
+        $query = $this->uri->getQuery();
+        if ($query !== null) {
             $target .= '?' . $this->uri->getQuery();
         }
         
-        return $target;
+        $this->requestTarget = $target;
+        
+        return $this->requestTarget;
     }
     
     public function withRequestTarget($requestTarget)
     {
-        if($this->requestTarget === $requestTarget) {
-            return $this;
-        }
-        
         if (preg_match('#\s#', $requestTarget)) {
             throw new InvalidArgumentException(
                 'Invalid request target provided; cannot contain whitespace'
@@ -62,15 +61,12 @@ class Request implements RequestInterface
     
     public function getMethod()
     {
+        $this->requireMethod();
         return $this->method;
     }
     
     public function withMethod($method)
     {
-        if($this->method === $method) {
-            return $this;
-        }
-        
         $this->validateMethod($method);
         
         $new = clone $this;
@@ -80,6 +76,7 @@ class Request implements RequestInterface
     
     public function getUri()
     {
+        $this->requireUri();
         return $this->uri;
     }
     
@@ -90,16 +87,22 @@ class Request implements RequestInterface
         return $new;
     }
     
-    private function assertValidMethod($method)
+    protected function validateMethod($method)
     {
-        if ($method !== null) {
-            return;
-        }
-
         $method = strtoupper($method);
         
-        if (!in_array($method, self::validMethods, true)) {
+        if (!in_array($method, $this->validMethods, true)) {
             throw new InvalidArgumentException("Unsupported HTTP method '$method' provided");
         }
+    }
+    
+    protected function requireMethod()
+    {
+        
+    }
+    
+    protected function requireUri()
+    {
+    
     }
 }

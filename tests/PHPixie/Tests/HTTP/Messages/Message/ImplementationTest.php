@@ -14,7 +14,7 @@ class ImplementationTest extends \PHPixie\Tests\HTTP\Messages\MessageTest
     public function testInvalidHeaders()
     {
         $this->headers['Fairy'] = array();
-        $this->setExpectedException('\PHPixie\HTTP\Exception');
+        $this->setExpectedException('\InvalidArgumentException');
         $this->message();
     }
     
