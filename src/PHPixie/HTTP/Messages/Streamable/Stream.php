@@ -1,8 +1,11 @@
 <?php
 
-namespace PHPixie\HTTP\Message\Streamable;
+namespace PHPixie\HTTP\Messages\Streamable;
 
-class Resource implements \PHPixie\HTTP\Message\Streamable
+use Psr\Http\Message\StreamableInterface;
+use InvalidArgumentException;
+
+class Stream implements StreamableInterface
 {
     protected $name;
     protected $mode;
@@ -23,10 +26,9 @@ class Resource implements \PHPixie\HTTP\Message\Streamable
     protected function resource()
     {
         if(!$this->processed) {
-            $this->resource = fopen($this->name, $this->mode);
             
-            if($this->resource === false) {
-                $this->resource = null;
+            if($this->resource !== false) {
+                $this->resource = fopen($this->name, $this->mode);
             }
             
             $this->processed = true;
@@ -163,7 +165,6 @@ class Resource implements \PHPixie\HTTP\Message\Streamable
         
         return fread($this->resource(), $length);
     }
-    
     
     public function getContents()
     {
