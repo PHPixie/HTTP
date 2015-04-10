@@ -7,14 +7,7 @@ namespace PHPixie\Tests\HTTP\Messages\Message\Request;
  */
 class ImplementationTest extends \PHPixie\Tests\HTTP\Messages\Message\RequestTest
 {
-    protected $method = 'Get';
     protected $uri;
-    
-    public function setUp()
-    {
-        $this->uri = $this->getUri();
-        parent::setUp();
-    }
     
     /**
      * @covers ::__construct
@@ -36,11 +29,6 @@ class ImplementationTest extends \PHPixie\Tests\HTTP\Messages\Message\RequestTes
         $this->method = 'INVALID';
         $this->setExpectedException('\InvalidArgumentException');
         $this->message();
-    }
-    
-    protected function getUri()
-    {
-        return $this->abstractMock('\Psr\Http\Message\UriInterface');
     }
     
     public function message()

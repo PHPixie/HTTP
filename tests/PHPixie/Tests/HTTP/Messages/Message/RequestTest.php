@@ -7,6 +7,14 @@ namespace PHPixie\Tests\HTTP\Messages\Message;
  */
 abstract class RequestTest extends \PHPixie\Tests\HTTP\Messages\MessageTest
 {
+    protected $method = 'Get';
+    
+    public function setUp()
+    {
+        $this->uri = $this->getUri();
+        parent::setUp();
+    }
+    
     /**
      * @covers ::getUri
      * @covers ::withUri
@@ -112,5 +120,10 @@ abstract class RequestTest extends \PHPixie\Tests\HTTP\Messages\MessageTest
                 'getUri'    => $this->uri
             )
         );
+    }
+    
+    protected function getUri()
+    {
+        return $this->abstractMock('\Psr\Http\Message\UriInterface');
     }
 }
