@@ -1,14 +1,14 @@
 <?php
 namespace PHPixie\HTTP\Messages\Message;
 
-use Psr\Http\Message\RequestInterface;
+use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\UriInterface;
 use InvalidArgumentException;
 
-class Request extends    \PHPixie\HTTP\Messages\Message
-              implements RequestInterface
+class Response extends    Implementation
+              implements ResponseInterface
 {
-    const PHRASES = array(
+    protected static $codePhrases = array(
         // INFORMATIONAL CODES
         100 => 'Continue',
         101 => 'Switching Protocols',
@@ -83,28 +83,27 @@ class Request extends    \PHPixie\HTTP\Messages\Message
      */
     private $statusCode = 200;
     
-    /**
-     * @param string|resource|StreamableInterface $stream Stream identifier and/or actual stream resource
-     * @param int $status Status code for the response, if any.
-     * @param array $headers Headers for the response, if any.
-     * @throws InvalidArgumentException on any invalid element.
-     */
-    public function __construct($body = 'php://memory', $status = 200, array $headers = [])
+    public function __construct($protocolVersion, $headers, $body, $statusCode = 200, $reasonPhrase = null)
     {
-        if (! is_string($body) && ! is_resource($body) && ! $body instanceof StreamableInterface) {
-            throw new InvalidArgumentException(
-                'Stream must be a string stream resource identifier, '
-                . 'an actual stream resource, '
-                . 'or a Psr\Http\Message\StreamableInterface implementation'
-            );
+        parent::__construct($protocolVersion, $headers, $body);
+        
+        $this->validateStatusCode($statusCode);
+        if($reasonPhrase === null) {
+            $reasonPhrase = $this->statusCodePhrase($code);
         }
-        if (null !== $status) {
-            $this->validateStatus($status);
-        }
-        $this->stream     = ($body instanceof StreamableInterface) ? $body : new Stream($body, 'wb+');
-        $this->statusCode = $status ? (int) $status : 200;
-        list($this->headerNames, $this->headers) = $this->filterHeaders($headers);
+        
+        $this->statusCode      = $statusCode;
+        $this->reasonPhrase    = $reasonPhrase;
     }
+    
+    protected function statusCodePhrase($statusCode)
+    {
+        if(!array_key_exists($this->statusCode, static::$phrases)) {
+            $this->reasonPhrase = static::$phrases[$this->statusCode];
+        }
+        
+        return null;
+    }    
     
     public function getStatusCode()
     {
@@ -113,33 +112,26 @@ class Request extends    \PHPixie\HTTP\Messages\Message
     
     public function getReasonPhrase()
     {
-        if (! $this->reasonPhrase
-            && isset($this->phrases[$this->statusCode])
-        ) {
-            $this->reasonPhrase = $this->phrases[$this->statusCode];
-        }
         return $this->reasonPhrase;
     }
     
     public function withStatus($code, $reasonPhrase = null)
     {
-        $this->validateStatus($code);
+        $this->validateStatusCode($code);
+        if($reasonPhrase === null) {
+            $reasonPhrase = $this->statusCodePhrase($code);
+        }
+        
         $new = clone $this;
-        $new->statusCode   = (int) $code;
+        $new->statusCode = $code;
         $new->reasonPhrase = $reasonPhrase;
         return $new;
     }
 
-    private function validateStatus($code)
+    private function validateStatusCode($code)
     {
-        if (! is_numeric($code)
-            || is_float($code)
-            || $code < 100
-            || $code >= 600
-        ) {
-            throw new InvalidArgumentException(sprintf(
-                'Invalid status code "%s"; must be an integer between 100 and 599, inclusive',
-                (is_scalar($code) ? $code : gettype($code))
-            ));
+        if ($code < 100 || $code > 599) {
+            throw new InvalidArgumentException("Invalid status '$code', must be between 100 and 599");
         }
     }
+}
