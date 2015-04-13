@@ -22,6 +22,7 @@ class StringTest extends \PHPixie\Test\Testcase
     
     public function tearDown()
     {
+        $this->stream->close();
         if(file_exists($this->file)) {
             unlink($this->file);
         }

@@ -58,8 +58,8 @@ abstract class RequestTest extends \PHPixie\Tests\HTTP\Messages\MessageTest
     
     protected function getRequestTargetTest($withPath, $withQuery)
     {
-        
-        if($withPath) {
+        $uri = $this->uri;
+        if(!$withPath) {
             $this->uri = null;
             $expected = '/';
             
@@ -71,7 +71,7 @@ abstract class RequestTest extends \PHPixie\Tests\HTTP\Messages\MessageTest
                 $query = 'test=1';
                 $expected.= '?'.$query;
             }else{
-                $query = null;
+                $query = '';
             }
             
             $this->method($this->uri, 'getPath', $path, array(), 0);
@@ -79,9 +79,11 @@ abstract class RequestTest extends \PHPixie\Tests\HTTP\Messages\MessageTest
         }
         $this->message = $this->message();
         
-        for($i=0; $i<1; $i++) {
+        for($i=0; $i<2; $i++) {
             $this->assertSame($expected, $this->message->getRequestTarget());
         }
+        
+        $this->uri = $uri;
     }
     
     /**

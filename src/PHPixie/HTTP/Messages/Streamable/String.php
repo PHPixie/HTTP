@@ -31,7 +31,7 @@ class String implements StreamableInterface
 
     public function getSize()
     {
-        return mb_strlen($this->contents, '8bit');
+        return mb_strlen($this->string, '8bit');
     }
     
     public function tell()

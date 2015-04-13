@@ -89,17 +89,17 @@ class Response extends    Implementation
         
         $this->validateStatusCode($statusCode);
         if($reasonPhrase === null) {
-            $reasonPhrase = $this->statusCodePhrase($code);
+            $reasonPhrase = $this->statusCodePhrase($statusCode);
         }
         
-        $this->statusCode      = $statusCode;
-        $this->reasonPhrase    = $reasonPhrase;
+        $this->statusCode   = $statusCode;
+        $this->reasonPhrase = $reasonPhrase;
     }
     
     protected function statusCodePhrase($statusCode)
     {
-        if(!array_key_exists($this->statusCode, static::$phrases)) {
-            $this->reasonPhrase = static::$phrases[$this->statusCode];
+        if(array_key_exists($statusCode, static::$codePhrases)) {
+            return static::$codePhrases[$statusCode];
         }
         
         return null;
@@ -128,7 +128,7 @@ class Response extends    Implementation
         return $new;
     }
 
-    private function validateStatusCode($code)
+    protected function validateStatusCode($code)
     {
         if ($code < 100 || $code > 599) {
             throw new InvalidArgumentException("Invalid status '$code', must be between 100 and 599");

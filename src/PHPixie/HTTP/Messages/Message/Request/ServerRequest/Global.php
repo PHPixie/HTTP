@@ -2,7 +2,7 @@
 
 namespace PHPixie\HTTP\Messages\Message\Request\ServerRequest;
 
-class Global extends \PHPixie\HTTP\Messages\Message\Request\ServerRequest
+class Server extends \PHPixie\HTTP\Messages\Message\Request\ServerRequest
 {
     public function __construct($server, $get, $post, $cookies, $files, $body)
     {

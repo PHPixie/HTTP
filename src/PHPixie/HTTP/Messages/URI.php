@@ -1,5 +1,6 @@
 <?php
-namespace Phly\Http;
+
+namespace PHPixie\HTTP\Messages;
 
 use InvalidArgumentException;
 use Psr\Http\Message\UriInterface;
@@ -14,7 +15,7 @@ use Psr\Http\Message\UriInterface;
  * state of the current instance and return a new instance that contains the
  * changed state.
  */
-class Uri implements UriInterface
+abstract class URI implements UriInterface
 {
     /**
      * Sub-delimiters used in query strings and fragments.
@@ -29,33 +30,14 @@ class Uri implements UriInterface
      * @const string
      */
     const CHAR_UNRESERVED = 'a-zA-Z0-9_\-\.~';
-
-    protected $fragments
+    
     /**
      * generated uri string cache
      * @var string|null
      */
-    private $uriString;
+    protected $uriString;
 
-    /**
-     * Function to urlencode the value returned by a regexp.
-     * 
-     * @var callable
-     */
-    private $urlEncode;
-
-
-    public function __construct($uri = '')
-    {
-        if ($uri !== '') {
-            $this->parseUri($uri);
-        }
-    }
-
-    public function __clone()
-    {
-        $this->uriString = null;
-    }
+    protected $parts = array();
 
     public function __toString()
     {
@@ -63,215 +45,177 @@ class Uri implements UriInterface
             
             $uri = '';
 
-            if(($authority = $this->getScheme()) !== '') {
-                $uri .= $scheme.'://';
+            if(($scheme = $this->getScheme()) !== '') {
+                $uri .= $scheme . '://';
             }
 
             $uri .= $this->getAuthority();
             $uri .= $this->getPath();
 
-            if($this->query !== null) {
-                $uri .= '?'.$this->query;
+            if(($query = $this->getQuery()) !== '') {
+                $uri .= '?' . $query;
             }
 
-            if($this->fragment !== null) {
-                $uri .= '?'.$this->fragment;
+            if(($fragment = $this->getFragment()) !== '') {
+                $uri .= '#' . $fragment;
             }
             
             $this->uriString = $uri;
         }
-
+        
         return $this->uriString;
-    }
-
-    public function getScheme()
-    {
-        return $this->scheme;
     }
 
     public function getAuthority()
     {
-        if ($this->host === '') {
-            return '';
-        }
-
-        $authority = $this->host;
+        $authority = '';
+        $authority.= $this->getHost();
         
-        if (! empty($this->userInfo)) {
-            $authority = $this->userInfo . '@' . $authority;
+        if (($userInfo = $this->getUserInfo()) !== '') {
+            $authority = $userInfo . '@' . $authority;
         }
-
-        if ($this->isNonStandardPort($this->scheme, $this->host, $this->port)) {
-            $authority .= ':' . $this->port;
+        
+        $port = $this->getPort();
+        if ($port !== null) {
+            $authority .= ':' . $port;
         }
 
         return $authority;
     }
 
+    public function getScheme()
+    {
+        return $this->part('scheme');
+    }
+    
     public function getUserInfo()
     {
-        return $this->userInfo;
+        return $this->part('userInfo');
     }
 
     public function getHost()
     {
-        return $this->host;
+        return $this->part('host');
     }
 
     public function getPort()
     {
-        return $this->port;
+        $port = $this->part('port');
+        
+        if($this->isStandardPort($this->getScheme(), $port)) {
+            $port = null;
+        }
+        
+        return $port;
     }
 
     public function getPath()
     {
-        return $this->path;
+        return $this->part('path');
     }
 
     public function getQuery()
     {
-        return $this->query;
+        return $this->part('query');
     }
 
     public function getFragment()
     {
-        return $this->fragment;
+        return $this->part('fragment');
     }
 
     public function withScheme($scheme)
     {
         $scheme = strtolower($scheme);
         $scheme = str_replace('://', '', $scheme);
-
-        if ($scheme === $this->scheme) {
-            return $this;
-        }
-
+        
         if (!in_array($scheme, ['', 'http', 'https'], true)) {
             throw new InvalidArgumentException("Unsupported scheme '$scheme', must be either 'http', 'https' or ''");
         }
 
-        return $this->update('scheme', $value);
+        return $this->updatePart('scheme', $scheme);
     }
 
     public function withUserInfo($user, $password = null)
     {
-        $value = $user;
-        if ($password) {
-            $value .= ':' . $password;
+        $userInfo = $this->normalizePart($user);
+        
+        if ($userInfo !== '' && $password !== null) {
+            $userInfo.= ':' . $password;
         }
         
-        return $this->checkUpdate('userInfo', $value);
+        return $this->updatePart('userInfo', $userInfo);
     }
     
-    protected function checkUpdate($key, $value)
-    {
-        if($this->$key === $value) {
-            return $this;
-        }
-        
-        return $this->update($key, $value);
-    }
-    
-    protected function update($key, $value)
+    protected function updatePart($key, $value)
     {
         $new = clone $this;
-        $new->$key = $value;
+        $new->parts[$key] = $value;
+        $new->uriString = null;
 
         return $new;
     }
     
     public function withHost($host)
     {
-        return $this->checkUpdate('host', $host);
+        $host = $this->normalizePart($host);
+        return $this->updatePart('host', $host);
     }
 
     public function withPort($port)
     {
-        if (!is_numeric($port)) {
-            throw new InvalidArgumentException("Port '$port' is not numeric");
+        if($port !== null) {
+            if (!is_numeric($port)) {
+                throw new InvalidArgumentException("Port '$port' is not numeric");
+            }
+            
+            $port = (int) $port;
+            
+            if ($port < 1 || $port > 65535) {
+                throw new InvalidArgumentException("Invalid port '$port' specified");
+            }
         }
-
-        $port = (int) $port;
-
-        if ($port === $this->port) {
-            return $this;
-        }
-
-        if ($port < 1 || $port > 65535) {
-            throw new InvalidArgumentException("Invalid port '$port' specified");
-        }
-
-        return $this->update('port', $port);
+        
+        return $this->updatePart('port', $port);
     }
 
     public function withPath($path)
     {
-        if($this->path === $path) {
-            return $this;
-        }
-        
-        if (strpos($path, '?') !== false) {
-            throw new InvalidArgumentException(
-                'Invalid path provided; must not contain a query string'
-            );
-        }
-
-        if (strpos($path, '#') !== false) {
-            throw new InvalidArgumentException(
-                'Invalid path provided; must not contain a URI fragment'
-            );
-        }
-
-        $path = $this->filterPath($path);
-
-        return $this->update('path', $path);
+        $path = $this->normalizePath($path);
+        return $this->updatePart('path', $path);
     }
 
     public function withQuery($query)
     {
-        if($this->query === $query) {
-            return $this;
-        }
-        
-        if (strpos($query, '#') !== false) {
-            throw new InvalidArgumentException(
-                'Query string must not include a URI fragment'
-            );
-        }
+        $query = $this->normalizeQuery($query);
+        return $this->updatePart('query', $query);
 
-        $query = $this->filterQuery($query);
-
-        return $this->update('query', $query);
     }
 
     public function withFragment($fragment)
     {
-        if($this->fragment === $fragment) {
-            return $this;
+        $fragment = $this->normalizeFragment($fragment);
+        return $this->updatePart('fragment', $fragment);
+    }
+    
+    protected function normalizeFragment($fragment)
+    {
+        $fragment = $this->normalizePart($fragment, '#');
+        return $this->normalizeQueryString($fragment);
+    }
+    
+    protected function normalizePart($part, $prefix = null) {
+        if($part === null || $part === '') {
+            return '';
         }
         
-        $fragment = $this->filterFragment($fragment);
-        return $this->update('fragment', $fragment);
-    }
-
-    private function parseUri($uri)
-    {
-        $parts = parse_url($uri);
-
-        $this->scheme    = isset($parts['scheme'])   ? $parts['scheme']   : '';
-        $this->userInfo  = isset($parts['user'])     ? $parts['user']     : '';
-        $this->host      = isset($parts['host'])     ? $parts['host']     : '';
-        $this->port      = isset($parts['port'])     ? $parts['port']     : null;
-        $this->path      = isset($parts['path'])     ? $this->filterPath($parts['path']) : '';
-        $this->query     = isset($parts['query'])    ? $this->filterQuery($parts['query']) : '';
-        $this->fragment  = isset($parts['fragment']) ? $this->filterFragment($parts['fragment']) : '';
-
-        if (isset($parts['pass'])) {
-            $this->userInfo .= ':' . $parts['pass'];
+        if($prefix !== null && $part[0] === $prefix) {
+            return substr($part, 1);
         }
+        
+        return $part;
     }
-
+    
     /**
      * Is a given port non-standard for the current scheme?
      *
@@ -280,21 +224,13 @@ class Uri implements UriInterface
      * @param int $port
      * @return bool
      */
-    private static function isNonStandardPort($scheme, $host, $port)
+    protected static function isStandardPort($scheme, $port)
     {
-        if (! $scheme) {
+        if ($scheme === 'https' && $port === 443) {
             return true;
         }
 
-        if (! $host || ! $port) {
-            return false;
-        }
-
-        if ($scheme === 'https' && $port !== 443) {
-            return true;
-        }
-
-        if ($scheme === 'http' && $port !== 80) {
+        if ($scheme === 'http' && $port === 80) {
             return true;
         }
 
@@ -307,15 +243,27 @@ class Uri implements UriInterface
      * @param string $path
      * @return string
      */
-    private function filterPath($path)
+    protected function normalizePath($path)
     {
-        if ($path !== null && (empty($path) || substr($path, 0, 1) !== '/')) {
+        if (strpos($path, '?') !== false) {
+            throw new InvalidArgumentException("Path '$path' contains '?'");
+        }
+
+        if (strpos($path, '#') !== false) {
+            throw new InvalidArgumentException("Path '$path' contains '#'");
+        }
+         
+        if ($path === null || $path === '') {
+            return '/';
+        }
+        
+        if($path[0] !== '/') {
             $path = '/' . $path;
         }
 
         return preg_replace_callback(
             '/(?:[^' . self::CHAR_UNRESERVED . ':@&=\+\$,\/;%]+|%(?![A-Fa-f0-9]{2}))/',
-            $this->urlEncode,
+            array($this, 'encodeMatchedQueryPart'),
             $path
         );
     }
@@ -328,61 +276,28 @@ class Uri implements UriInterface
      * @param string $query 
      * @return string
      */
-    private function filterQuery($query)
+    protected function normalizeQuery($query)
     {
-        if (! empty($query) && strpos($query, '?') === 0) {
-            $query = substr($query, 1);
-        }
-
-        $parts = explode('&', $query);
-        foreach ($parts as $index => $part) {
-            list($key, $value) = $this->splitQueryValue($part);
-            if ($value === null) {
-                $parts[$index] = $this->filterQueryOrFragment($key);
-                continue;
-            }
-            $parts[$index] = sprintf(
-                '%s=%s',
-                $this->filterQueryOrFragment($key),
-                $this->filterQueryOrFragment($value)
+        if (strpos($query, '#') !== false) {
+            throw new InvalidArgumentException(
+                'Query string must not include a URI fragment'
             );
+        }
+        
+        $query = $this->normalizePart($query, '?');        
+        
+        $pairs = explode('&', $query);
+        
+        foreach ($pairs as $pairKey => $pair) {
+            $pair = explode('=', $pair, 2);
+            foreach($pair as $key => $value) {
+                $pair[$key] = $this->normalizeQueryString($value);
+            }
+            
+            $parts[$pairKey] = implode('=', $pair);
         }
 
         return implode('&', $parts);
-    }
-
-    /**
-     * Split a query value into a key/value tuple.
-     * 
-     * @param string $value 
-     * @return array A value with exactly two elements, key and value
-     */
-    private function splitQueryValue($value)
-    {
-        $data = explode('=', $value, 2);
-        if (1 === count($data)) {
-            $data[] = null;
-        }
-        return $data;
-    }
-
-    /**
-     * Filter a fragment value to ensure it is properly encoded.
-     * 
-     * @param null|string $fragment 
-     * @return string
-     */
-    private function filterFragment($fragment)
-    {
-        if (null === $fragment) {
-            $fragment = '';
-        }
-
-        if (! empty($fragment) && strpos($fragment, '#') === 0) {
-            $fragment = substr($fragment, 1);
-        }
-
-        return $this->filterQueryOrFragment($fragment);
     }
 
     /**
@@ -391,12 +306,34 @@ class Uri implements UriInterface
      * @param string $value
      * @return string
      */
-    private function filterQueryOrFragment($value)
-    {
+    protected function normalizeQueryString($value)
+    {        
         return preg_replace_callback(
             '/(?:[^' . self::CHAR_UNRESERVED . self::CHAR_SUB_DELIMS . '%:@\/\?]+|%(?![A-Fa-f0-9]{2}))/',
-            $this->urlEncode,
+            array($this, 'encodeMatchedQueryPart'),
             $value
         );
+    }
+    
+    protected function encodeMatchedQueryPart($matches) {
+        return rawurlencode($matches[0]);
+    }
+    
+    protected function part($name)
+    {
+        if(!array_key_exists($name, $this->parts)) {
+            $this->requirePart($name);
+        }
+        
+        return $this->parts[$name];
+    }
+    
+    protected function requirePart($name)
+    {
+        if($name === 'port') {
+            $this->parts['port'] = null;
+        }else{
+            $this->parts[$name] = '';
+        }
     }
 }

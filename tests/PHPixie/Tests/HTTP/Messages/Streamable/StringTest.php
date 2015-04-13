@@ -1,6 +1,6 @@
 <?php
 
-namespace PHPixie\Tests\HTTP\Messages\Stremable;
+namespace PHPixie\Tests\HTTP\Messages\Streamable;
 
 /**
  * @coversDefaultClass PHPixie\HTTP\Messages\Streamable\String
@@ -71,7 +71,7 @@ class StringTest extends \PHPixie\Test\Testcase
     public function testMethods()
     {
         $sets = array(
-            array('getSize', null),
+            array('getSize', strlen($this->string)),
             array('tell', false),
             array('eof', true),
             array('isSeekable', false),

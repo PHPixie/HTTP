@@ -8,7 +8,7 @@ use InvalidArgumentException;
 class Request extends    \PHPixie\HTTP\Messages\Message
               implements RequestInterface
 {
-    protected $validMethods = array(
+    protected static $validMethods = array(
         'CONNECT',
         'DELETE',
         'GET',
@@ -37,8 +37,9 @@ class Request extends    \PHPixie\HTTP\Messages\Message
         $target = $this->uri->getPath();
         
         $query = $this->uri->getQuery();
-        if ($query !== null) {
-            $target .= '?' . $this->uri->getQuery();
+        
+        if ($query !== '') {
+            $target .= '?'.$query;
         }
         
         $this->requestTarget = $target;
@@ -91,7 +92,7 @@ class Request extends    \PHPixie\HTTP\Messages\Message
     {
         $method = strtoupper($method);
         
-        if (!in_array($method, $this->validMethods, true)) {
+        if (!in_array($method, static::$validMethods, true)) {
             throw new InvalidArgumentException("Unsupported HTTP method '$method' provided");
         }
     }
