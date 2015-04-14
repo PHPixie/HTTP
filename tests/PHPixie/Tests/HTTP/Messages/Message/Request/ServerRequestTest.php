@@ -7,11 +7,11 @@ namespace PHPixie\Tests\HTTP\Messages\Message\Request;
  */
 abstract class ServerRequestTest extends \PHPixie\Tests\HTTP\Messages\Message\RequestTest
 {
-    protected $serverParams;
-    protected $queryParams;
-    protected $parsedBody;
-    protected $cookieParams;
-    protected $fileParams;
+    protected $serverParams = array();
+    protected $queryParams  = array();
+    protected $parsedBody   = array();
+    protected $cookieParams = array();
+    protected $fileParams   = array();
     
     protected $parameterNames = array(
         'serverParams',
@@ -29,7 +29,8 @@ abstract class ServerRequestTest extends \PHPixie\Tests\HTTP\Messages\Message\Re
     public function setUp()
     {
         foreach($this->parameterNames as $name) {
-            $this->$name = array($name => 'Pixie');
+            $array = &$this->$name;
+            $arr[$name] = 'Pixie';
         }
         
         parent::setUp();

@@ -5,7 +5,7 @@ namespace PHPixie\Tests\HTTP\Messages\Message\Request\ServerRequest;
 /**
  * @coversDefaultClass PHPixie\HTTP\Messages\Message\Request\ServerRequest\Implementation
  */
-class ServerRequestTest extends \PHPixie\Tests\HTTP\Messages\Message\Request\ServerRequestTest
+class ImplementationTest extends \PHPixie\Tests\HTTP\Messages\Message\Request\ServerRequestTest
 {
     public function message()
     {

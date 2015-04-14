@@ -12,7 +12,7 @@ abstract class MessageTest extends \PHPixie\Test\Testcase
         'Fairy' => array(
             'Pixie'
         ),
-        'Name'  => array(
+        'Pixie-Name'  => array(
             'Trixie',
             'Blum'
         )

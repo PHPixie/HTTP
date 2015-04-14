@@ -1,9 +1,9 @@
 <?php
 
-namespace PHPixie\Tests\HTTP\Messages\Stremable;
+namespace PHPixie\Tests\HTTP\Messages\Strem;
 
 /**
- * @coversDefaultClass PHPixie\HTTP\Messages\Streamable\Stream
+ * @coversDefaultClass PHPixie\HTTP\Messages\Stream\Implementation
  */
 class StringTest extends \PHPixie\Test\Testcase
 {
@@ -119,23 +119,24 @@ class StringTest extends \PHPixie\Test\Testcase
      */
     public function testSeek()
     {
-        $this->stream = $this->stream('r');
+        $stream = $this->stream('r');
         
-        $this->assertSame(false, $this->stream->eof());
-        $this->assertSame(0, $this->stream->tell());
+        $this->assertSame(false, $stream->eof());
+        $this->assertSame(0, $stream->tell());
         
-        $this->assertSame(true, $this->stream->seek(2));
-        $this->assertSame(2, $this->stream->tell());
+        $stream->seek(2);
+        $this->assertSame(2, $stream->tell());
         
-        $this->assertSame(true, $this->stream->seek(0, SEEK_END));
-        $this->assertSame(4, $this->stream->tell());
+        $stream->seek(0, SEEK_END);
+        $this->assertSame(4, $stream->tell());
         
-        $this->stream->read(1);
+        $stream->read(1);
         
-        $this->assertSame(true, $this->stream->eof());
+        $this->assertSame(true, $stream->eof());
         
-        $this->assertSame(true, $this->stream->rewind());
-        $this->assertSame(0, $this->stream->tell());
+        $stream->rewind();
+        $this->assertSame(0, $stream->tell());
+        
     }
     
     /**
@@ -197,16 +198,16 @@ class StringTest extends \PHPixie\Test\Testcase
         
         $sets = array(
             array('getSize', null),
-            array('tell', false),
+            array('tell', 'exception'),
             array('eof', true),
             array('isSeekable', false),
             array('isReadable', false),
             array('isWritable', false),
-            array('seek', array(1), false),
-            array('rewind', false),
-            array('write', array('a'), false),
-            array('read', array(1), false),
-            array('getContents', ''),
+            array('seek', array(1), 'exception'),
+            array('rewind', 'exception'),
+            array('write', array('a'), 'exception'),
+            array('read', array(1), 'exception'),
+            array('getContents', 'exception'),
             array('getMetadata', null),
             array('getMetadata', array('a'), null),
             array('__toString', '')
@@ -222,7 +223,15 @@ class StringTest extends \PHPixie\Test\Testcase
             }
             
             $callback = array($this->stream, $set[0]);
-            $this->assertSame($expect, call_user_func_array($callback, $params));
+            
+            var_dump($expect);
+            if($expect === 'exception') {
+                $this->assertException(function() use($callback, $params) {
+                    call_user_func_array($callback, $params);
+                }, '\RuntimeException');
+            }else{
+                $this->assertSame($expect, call_user_func_array($callback, $params));
+            }
         }
     }
     
@@ -232,6 +241,6 @@ class StringTest extends \PHPixie\Test\Testcase
             $file = $this->file;
         }
         
-        return new \PHPixie\HTTP\Messages\Streamable\Stream($file, $mode);
+        return new \PHPixie\HTTP\Messages\Stream\Implementation($file, $mode);
     }
 }

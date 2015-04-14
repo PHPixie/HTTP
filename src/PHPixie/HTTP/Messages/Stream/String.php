@@ -1,10 +1,10 @@
 <?php
 
-namespace PHPixie\HTTP\Messages\Streamable;
+namespace PHPixie\HTTP\Messages\Stream;
 
-use Psr\Http\Message\StreamableInterface;
+use Psr\Http\Message\StreamInterface;
 
-class String implements StreamableInterface
+class String implements StreamInterface
 {
     protected $string;
     

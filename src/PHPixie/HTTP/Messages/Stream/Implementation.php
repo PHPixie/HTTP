@@ -1,11 +1,11 @@
 <?php
 
-namespace PHPixie\HTTP\Messages\Streamable;
+namespace PHPixie\HTTP\Messages\Stream;
 
-use Psr\Http\Message\StreamableInterface;
-use InvalidArgumentException;
+use Psr\Http\Message\StreamInterface;
+use RuntimeException;
 
-class Stream implements StreamableInterface
+class Implementation implements StreamInterface
 {
     protected $name;
     protected $mode;
@@ -23,7 +23,7 @@ class Stream implements StreamableInterface
         $this->mode = $mode;
     }
     
-    protected function resource()
+    protected function resource($throwIfDetached = false)
     {
         if(!$this->processed) {
             
@@ -32,6 +32,10 @@ class Stream implements StreamableInterface
             }
             
             $this->processed = true;
+        }
+        
+        if($throwIfDetached && $this->resource === null) {
+            throw new RuntimeException("The resource has been detached");
         }
         
         return $this->resource;
@@ -74,11 +78,7 @@ class Stream implements StreamableInterface
     
     public function tell()
     {
-        if(($resource = $this->resource()) === null) {
-            return false;
-        }
-        
-        return ftell($resource);
+        return ftell($this->resource(true));
     }
     
     public function eof()
@@ -136,31 +136,30 @@ class Stream implements StreamableInterface
     public function seek($offset, $whence = SEEK_SET)
     {
         if(!$this->isSeekable()) {
-            return false;
+            throw new RuntimeException("The stream is not seakable");
         }
         
-        $result = fseek($this->resource(), $offset, $whence);
-        return $result === 0;
+        fseek($this->resource(), $offset, $whence);
     }
     
     public function rewind()
     {
-        return $this->seek(0);
+        $this->seek(0);
     }
     
     public function write($string)
     {
         if(!$this->isWritable()) {
-            return false;
+            throw new RuntimeException("The stream is not writable");
         }
         
-        return fwrite($this->resource, $string);
+        return fwrite($this->resource(), $string);
     }
     
     public function read($length)
     {
         if(!$this->isReadable()) {
-            return false;
+            throw new RuntimeException("The stream is not readable");
         }
         
         return fread($this->resource(), $length);
@@ -168,11 +167,7 @@ class Stream implements StreamableInterface
     
     public function getContents()
     {
-        if(!$this->isReadable()) {
-            return '';
-        }
-        
-        return stream_get_contents($this->resource());
+        return stream_get_contents($this->resource(true));
     }
     
     public function getMetadata($key = null)
