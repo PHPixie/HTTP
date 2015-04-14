@@ -5,29 +5,38 @@ namespace PHPixie\HTTP\Messages;
 use Psr\Http\Message\UploadedFileInterface;
 use RuntimeException;
 
-class UploadedFile implements UploadedFileInterface
+abstract class UploadedFile implements UploadedFileInterface
 {
+    protected $messages;
+    
     protected $clientFilename;
     protected $clientMediaType;
-    protected $uploadedFilename;
+    protected $file;
     protected $error;
     protected $size;
     
+    protected $stream;
+    
+    public function __construct($messages)
+    {
+        $this->messages = $messages;
+    }
+    
     public function getStream()
     {
-    
+        if($this->stream === null) {
+            $this->assertValidUpload();
+            $this->stream = $this->messages->stream($this->file);
+        }
+        
+        return $this->stream;
     }
 
-    public function move($path)
-    {
-        $this->assertValidUpload();
-        $this->moveFile($path);
-    }
-    
-    protected abstract function moveFile($path);
+    abstract public function move($path);
     
     public function getSize()
     {
+        $this->requireSize();
         return $this->size;
     }
     
@@ -43,6 +52,7 @@ class UploadedFile implements UploadedFileInterface
     
     public function getClientMediaType()
     {
+        $this->requireClientMediaType();
         return $this->clientMediaType;
     }
     
@@ -51,5 +61,15 @@ class UploadedFile implements UploadedFileInterface
         if($this->error !== UPLOAD_ERR_OK) {
             throw new RuntimeException("File was not successfully uploaded");
         }
+    }
+    
+    protected function requireSize()
+    {
+    
+    }
+    
+    protected function requireClientMediaType()
+    {
+    
     }
 }

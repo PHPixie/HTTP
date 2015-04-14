@@ -6,8 +6,10 @@ use RuntimeException;
 
 class SAPI extends \PHPixie\HTTP\Messages\UploadedFile
 {
-    public function __construct($fileData)
+    public function __construct($messages, $fileData)
     {
+        parent::__construct($messages);
+        
         $this->clientFilename  = $fileData['name'];
         $this->clientMediaType = $fileData['type'];
         $this->file            = $fileData['tmp_name'];
@@ -15,8 +17,16 @@ class SAPI extends \PHPixie\HTTP\Messages\UploadedFile
         $this->size            = $fileData['size'];
     }
     
-    public function moveFile($path)
+    public function move($path)
     {
-        move_uploaded_file($this->file, $path);
+        $this->assertValidUpload();
+        if(!$this->moveUploadedFile($path)) {
+            throw new RuntimeException("Failed to move uploaded file '{$this->file}' to '$path'");
+        }
+    }
+    
+    protected function moveUploadedFile($path)
+    {
+        return move_uploaded_file($this->file, $path);
     }
 }

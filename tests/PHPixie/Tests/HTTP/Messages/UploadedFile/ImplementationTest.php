@@ -3,9 +3,9 @@
 namespace PHPixie\Tests\HTTP\Messages\UploadedFile;
 
 /**
- * @coversDefaultClass PHPixie\HTTP\Messages\UploadedFile\SAPI
+ * @coversDefaultClass PHPixie\HTTP\Messages\UploadedFile\Implementation
  */
-class SAPITest extends \PHPixie\Tests\HTTP\Messages\UploadedFileTest
+class ImplementationTest extends \PHPixie\Tests\HTTP\Messages\UploadedFileTest
 {
     
     /**
@@ -35,7 +35,11 @@ class SAPITest extends \PHPixie\Tests\HTTP\Messages\UploadedFileTest
     {
         $uploadedFile = new \PHPixie\HTTP\Messages\UploadedFile\SAPI(
             $this->messages,
-            $this->getFileData()
+            $this->clientFilename,
+            $this->clientMediaType,
+            $this->file,
+            $this->error,
+            $this->size
         );
         
         $this->assertException(function() use($uploadedFile) {
@@ -43,25 +47,18 @@ class SAPITest extends \PHPixie\Tests\HTTP\Messages\UploadedFileTest
         }, '\RuntimeException');
     }
         
-    protected function getFileData()
-    {
-        return array(
-            'name'     => $this->clientFilename,
-            'type'     => $this->clientMediaType,
-            'tmp_name' => $this->file,
-            'error'    => $this->error,
-            'size'     => $this->size
-        );
-    }
-    
     protected function uploadedFile()
     {
         return $this->getMock(
             '\PHPixie\HTTP\Messages\UploadedFile\SAPI',
-            array('moveUploadedFile'),
+            array('moveFile'),
             array(
                 $this->messages,
-                $this->getFileData()
+                $this->clientFilename,
+                $this->clientMediaType,
+                $this->file,
+                $this->error,
+                $this->size
             )
         );
     }

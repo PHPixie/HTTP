@@ -7,38 +7,25 @@ namespace PHPixie\Tests\HTTP\Messages;
  */
 abstract class UploadedFileTest extends \PHPixie\Test\Testcase
 {
-    protected $clientFilename;
-    protected $clientMediaType;
-    protected $file;
-    protected $error = 0;
-    protected $size;
+    protected $messages;
     
     protected $uploadedFile;
     
-    protected $destination;
+    protected $clientFilename  = 'Pixie.png';
+    protected $clientMediaType = 'image/png';
+    protected $file            = 'fairy.png';
+    protected $error           = 0;
+    protected $size            = 300;
     
     public function setUp()
     {
-        $tempDir = sys_get_temp_dir();
-        
-        $this->file        = tempnam($tempDir, 'uploaded_file_src');
-        $this->destination = tempnam($tempDir, 'uploaded_file_dest');
+        $this->messages = $this->quickMock('\PHPixie\HTTP\Messages');
         
         $this->uploadedFile = $this->uploadedFile();
     }
     
-    public function tearDown()
-    {
-        if(is_file($this->file)) {
-            unlink($this->file);
-        }
-        
-        if(is_file($this->destination)) {
-            unlink($this->destination);
-        }
-    }
-    
     /**
+     * @covers \PHPixie\HTTP\Messages\UploadedFile::__construct
      * @covers ::__construct
      * @covers ::<protected>
      */
@@ -46,20 +33,20 @@ abstract class UploadedFileTest extends \PHPixie\Test\Testcase
     {
     
     }
-
+    
     /**
-     * @covers ::move
+     * @covers ::getStream
      * @covers ::<protected>
      */
-    public function testMove()
+    public function testGetStream()
     {
-        file_put_contents($this->file, 'test');
-        $this->uploadedFile->move($this->destination);
-        
-        //$this->assertSame(false, file_exists($this->file));
-        $this->assertSame('test', file_get_contents($this->destination));
+        $stream = $this->abstractMock('\Psr\Http\Message\StreamInterface');
+        $this->method($this->messages, 'stream', $stream, array($this->file), 0);
+        for($i=0; $i<2; $i++) {
+            $this->assertSame($stream, $this->uploadedFile->getStream());
+        }
     }
-    
+
     /**
      * @covers ::getClientFilename
      * @covers ::getClientMediaType
@@ -80,6 +67,25 @@ abstract class UploadedFileTest extends \PHPixie\Test\Testcase
             $method = 'get'.ucfirst($name);
             $this->assertSame($this->$name, $this->uploadedFile->$method());
         }
+    }
+    
+    /**
+     * @covers ::getStream
+     * @covers ::move
+     * @covers ::<protected>
+     */
+    public function testInvalidUpload()
+    {
+        $this->error = 1;
+        $uploadedFile = $this->uploadedFile();
+        
+        $this->assertException(function() use($uploadedFile) {
+            $uploadedFile->getStream();
+        }, '\RuntimeException');
+        
+        $this->assertException(function() use($uploadedFile) {
+            $uploadedFile->move('test');
+        }, '\RuntimeException');
     }
     
     protected abstract function uploadedFile();
