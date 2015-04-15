@@ -173,10 +173,11 @@ class Implementation implements StreamInterface
     public function getMetadata($key = null)
     {
         if(($resource = $this->resource()) === null) {
-            return null;
+            $metadata = array();
+            
+        }else{
+            $metadata = stream_get_meta_data($resource);
         }
-        
-        $metadata = stream_get_meta_data($resource);
         
         if ($key === null) {
             return $metadata;

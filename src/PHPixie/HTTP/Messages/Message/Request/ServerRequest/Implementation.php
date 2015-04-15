@@ -14,7 +14,7 @@ class Implementation extends \PHPixie\HTTP\Messages\Message\Request\ServerReques
         $queryParams,
         $parsedBody,
         $cookieParams,
-        $fileParams,
+        $uploadedFiles,
         $attributes
     )
     {
@@ -31,7 +31,7 @@ class Implementation extends \PHPixie\HTTP\Messages\Message\Request\ServerReques
         $this->queryParams     = $queryParams;
         $this->parsedBody      = $parsedBody;
         $this->cookieParams    = $cookieParams;
-        $this->fileParams      = $fileParams;
+        $this->uploadedFiles   = $uploadedFiles;
         $this->attributes      = $attributes;
     }
 }

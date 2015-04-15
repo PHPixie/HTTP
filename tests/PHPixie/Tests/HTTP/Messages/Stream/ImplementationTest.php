@@ -1,16 +1,14 @@
 <?php
 
-namespace PHPixie\Tests\HTTP\Messages\Strem;
+namespace PHPixie\Tests\HTTP\Messages\Stream;
 
 /**
  * @coversDefaultClass PHPixie\HTTP\Messages\Stream\Implementation
  */
-class StringTest extends \PHPixie\Test\Testcase
+class ImplementationTest extends \PHPixie\Tests\HTTP\Messages\StreamTest
 {
     protected $file;
     protected $contents = 'test';
-    
-    protected $stream;
     
     public function setUp()
     {
@@ -208,7 +206,7 @@ class StringTest extends \PHPixie\Test\Testcase
             array('write', array('a'), 'exception'),
             array('read', array(1), 'exception'),
             array('getContents', 'exception'),
-            array('getMetadata', null),
+            array('getMetadata', array()),
             array('getMetadata', array('a'), null),
             array('__toString', '')
         );
@@ -224,7 +222,6 @@ class StringTest extends \PHPixie\Test\Testcase
             
             $callback = array($this->stream, $set[0]);
             
-            var_dump($expect);
             if($expect === 'exception') {
                 $this->assertException(function() use($callback, $params) {
                     call_user_func_array($callback, $params);

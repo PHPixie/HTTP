@@ -31,7 +31,7 @@ class ImplementationTest extends \PHPixie\Tests\HTTP\Messages\Message\RequestTes
         $this->message();
     }
     
-    public function message()
+    protected function message()
     {
         return new \PHPixie\HTTP\Messages\Message\Request\Implementation(
             $this->protocolVersion,

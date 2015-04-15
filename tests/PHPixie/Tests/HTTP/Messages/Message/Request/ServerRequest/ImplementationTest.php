@@ -7,7 +7,7 @@ namespace PHPixie\Tests\HTTP\Messages\Message\Request\ServerRequest;
  */
 class ImplementationTest extends \PHPixie\Tests\HTTP\Messages\Message\Request\ServerRequestTest
 {
-    public function message()
+    protected function message()
     {
         return new \PHPixie\HTTP\Messages\Message\Request\ServerRequest\Implementation(
             $this->protocolVersion,
@@ -19,7 +19,7 @@ class ImplementationTest extends \PHPixie\Tests\HTTP\Messages\Message\Request\Se
             $this->queryParams,
             $this->parsedBody,
             $this->cookieParams,
-            $this->fileParams,
+            $this->uploadedFiles,
             $this->attributes
         );
     }    

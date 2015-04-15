@@ -7,6 +7,77 @@ namespace PHPixie\Tests\HTTP\Messages\UploadedFile;
  */
 class ImplementationTest extends \PHPixie\Tests\HTTP\Messages\UploadedFileTest
 {
+ 
+    protected $tempDir;
+    
+    public function setUp()
+    {
+        $this->tempDir = sys_get_temp_dir();
+        
+        parent::setUp();
+    }
+    
+    /**
+     * @covers ::getFileBasename
+     * @covers ::getFileType
+     * @covers ::getFileSize
+     */
+    public function testFileGetters()
+    {
+        $this->prepareFile();
+        
+        $this->clientFilename  = pathinfo($this->file, PATHINFO_BASENAME);
+        $this->clientMediaType = filetype($this->file);
+        $this->size            = filesize($this->file);
+        
+        $this->uploadedFile = new \PHPixie\HTTP\Messages\UploadedFile\Implementation(
+            $this->http,
+            $this->file
+        );
+        
+        parent::testGetters();
+    }
+    
+    /**
+     * @covers ::getClientFilename
+     * @covers ::getClientMediaType
+     * @covers ::getError
+     * @covers ::getSize
+     * @covers ::<protected>
+     */
+    public function testGetters()
+    {   
+        $getters = array(
+            array('clientFilename', 'getFileBasename'),
+            array('clientMediaType', 'getFileType', true),
+            array('size', 'getFileSize', true),
+            array('error')
+        );
+        
+        foreach($getters as $set) {
+            $uploadedFile = $this->uploadedFile();
+            
+            $name = $set[0];
+            $method = 'get'.ucfirst($name);
+            
+            if(isset($set[1])) {
+                $this->method($uploadedFile, $set[1], $this->$name, array(), 0, true);
+            }
+            
+            for($i=0; $i<2; $i++) {
+                $this->assertSame($this->$name, $uploadedFile->$method());
+            }
+            
+            if(isset($set[2])) {
+                $uploadedFile = $this->uploadedFile();
+                $this->method($uploadedFile, $set[1], false, array(), 0, true);
+                
+                $this->assertException(function() use($uploadedFile, $method) {
+                    $uploadedFile->$method();
+                }, '\RuntimeException');
+            }
+        }
+    }
     
     /**
      * @covers ::move
@@ -16,10 +87,10 @@ class ImplementationTest extends \PHPixie\Tests\HTTP\Messages\UploadedFileTest
     {
         $destination = 'dest.png';
         
-        $this->method($this->uploadedFile, 'moveUploadedFile', true, array($destination), 0);
+        $this->method($this->uploadedFile, 'moveFile', true, array($destination), 0);
         $this->uploadedFile->move($destination);
         
-        $this->method($this->uploadedFile, 'moveUploadedFile', false, array($destination), 0);
+        $this->method($this->uploadedFile, 'moveFile', false, array($destination), 0);
         
         $uploadedFile = $this->uploadedFile;
         $this->assertException(function() use($uploadedFile, $destination) {
@@ -28,38 +99,83 @@ class ImplementationTest extends \PHPixie\Tests\HTTP\Messages\UploadedFileTest
     }
     
     /**
-     * @covers ::moveUploadedFile
+     * @covers ::getSize
      * @covers ::<protected>
      */
-    public function testMoveUploadedFile()
+    public function testInvalidFileSize()
     {
-        $uploadedFile = new \PHPixie\HTTP\Messages\UploadedFile\SAPI(
-            $this->messages,
-            $this->clientFilename,
-            $this->clientMediaType,
-            $this->file,
-            $this->error,
-            $this->size
+        $this->file = 'not_existing';
+        $uploadedFile = $this->uploadedFile();
+        
+        $methods = array(
+            'getClientMediaType',
+            'getSize'
         );
         
-        $this->assertException(function() use($uploadedFile) {
-            $uploadedFile->move('test');
-        }, '\RuntimeException');
+        foreach($methods as $method) {
+            $this->assertException(function() use($uploadedFile) {
+                $uploadedFile->$method();
+            }, '\RuntimeException');
+        }
     }
-        
-    protected function uploadedFile()
+    
+    /**
+     * @covers ::move
+     * @covers ::<protected>
+     */
+    public function testMoveFile()
     {
-        return $this->getMock(
-            '\PHPixie\HTTP\Messages\UploadedFile\SAPI',
-            array('moveFile'),
-            array(
-                $this->messages,
+        $this->prepareFile();
+        
+        $uploadedFile = new \PHPixie\HTTP\Messages\UploadedFile\Implementation(
+            $this->http,
+            $this->file
+        );
+        
+        $destination = tempnam($this->tempDir, 'uploaded_file_dest.php');
+        $uploadedFile->move($destination);
+        
+        $this->assertSame(false, file_exists($this->file));
+        $this->assertSame(true, file_exists($destination));
+    }
+    
+    protected function prepareInvalidUpload()
+    {
+        $this->error = 1;
+        return $this->uploadedFile(true);
+    }
+    
+    protected function prepareFile()
+    {
+        $this->file = tempnam($this->tempDir, 'uploaded_file_src.php');
+        file_put_contents($this->file, 'test');
+    }
+    
+    protected function uploadedFile($withParams = false)
+    {
+        $params = array(
+            $this->http,
+            $this->file
+        );
+        
+        if($withParams) {
+            $params = array_merge($params, array(
                 $this->clientFilename,
                 $this->clientMediaType,
-                $this->file,
-                $this->error,
-                $this->size
-            )
+                $this->size,
+                $this->error
+            ));
+        }
+        
+        return $this->getMock(
+            '\PHPixie\HTTP\Messages\UploadedFile\Implementation',
+            array(
+                'getFileBasename',
+                'getFileType',
+                'getFileSize',
+                'moveFile'
+            ),
+            $params
         );
     }
 }

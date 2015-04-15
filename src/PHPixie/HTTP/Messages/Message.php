@@ -2,7 +2,7 @@
 
 namespace PHPixie\HTTP\Messages;
 
-use Psr\Http\Message\StreamableInterface;
+use Psr\Http\Message\StreamInterface;
 use Psr\Http\Message\MessageInterface;
 use InvalidArgumentException;
 
@@ -42,10 +42,10 @@ abstract class Message implements MessageInterface
         return array_key_exists($lower, $this->headerNames);
     }
 
-    public function getHeader($header)
+    public function getHeaderLine($header)
     {
         $this->requireHeaders();
-        $lines = $this->getHeaderLines($header);
+        $lines = $this->getHeader($header);
         
         if (count($lines) === 0) {
             return null;
@@ -54,7 +54,7 @@ abstract class Message implements MessageInterface
         return implode(',', $lines);
     }
 
-    public function getHeaderLines($header)
+    public function getHeader($header)
     {
         $this->requireHeaders();
         $lower = strtolower($header);
@@ -77,7 +77,7 @@ abstract class Message implements MessageInterface
         return $this->modifyHeader($header, $value, true);
     }
     
-    protected function modifyHeader($header, $value, $append = false)
+    protected function modifyHeader($header, $value, $append = false, $clone = true)
     {
         $this->requireHeaders();
         if (!is_array($value)) {
@@ -101,11 +101,17 @@ abstract class Message implements MessageInterface
         
         $headers[$header] = $value;
         
-        $new = clone $this;
-        $new->headers = $headers;
-        $new->headerNames[$lower] = $header;
+        if($clone) {
+            $message = clone $this;
+            
+        }else{
+            $message = $this;
+        }
         
-        return $new;
+        $message->headers = $headers;
+        $message->headerNames[$lower] = $header;
+        
+        return $message;
     }
 
     public function withoutHeader($header)
@@ -113,11 +119,13 @@ abstract class Message implements MessageInterface
         $this->requireHeaders();
         $lower = strtolower($header);
         
-        $normalized = $this->headerNames[$lower];
-        
         $new = clone $this;
-        unset($new->headers[$normalized]);
-        unset($new->headerNames[$lower]);
+        
+        if(array_key_exists($lower, $this->headerNames)) {
+            $normalized = $this->headerNames[$lower];
+            unset($new->headers[$normalized]);
+            unset($new->headerNames[$lower]);
+        }
         
         return $new;
     }
@@ -128,7 +136,7 @@ abstract class Message implements MessageInterface
         return $this->body;
     }
 
-    public function withBody(StreamableInterface $body)
+    public function withBody(StreamInterface $body)
     {
         $new = clone $this;
         $new->body = $body;

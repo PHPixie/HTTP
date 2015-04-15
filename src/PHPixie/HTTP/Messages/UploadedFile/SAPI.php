@@ -6,9 +6,9 @@ use RuntimeException;
 
 class SAPI extends \PHPixie\HTTP\Messages\UploadedFile
 {
-    public function __construct($messages, $fileData)
+    public function __construct($http, $fileData)
     {
-        parent::__construct($messages);
+        parent::__construct($http);
         
         $this->clientFilename  = $fileData['name'];
         $this->clientMediaType = $fileData['type'];

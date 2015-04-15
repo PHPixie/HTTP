@@ -7,7 +7,7 @@ use RuntimeException;
 
 abstract class UploadedFile implements UploadedFileInterface
 {
-    protected $messages;
+    protected $http;
     
     protected $clientFilename;
     protected $clientMediaType;
@@ -17,32 +17,19 @@ abstract class UploadedFile implements UploadedFileInterface
     
     protected $stream;
     
-    public function __construct($messages)
+    public function __construct($http)
     {
-        $this->messages = $messages;
+        $this->http = $http;
     }
     
     public function getStream()
     {
         if($this->stream === null) {
             $this->assertValidUpload();
-            $this->stream = $this->messages->stream($this->file);
+            $this->stream = $this->http->stream($this->file);
         }
         
         return $this->stream;
-    }
-
-    abstract public function move($path);
-    
-    public function getSize()
-    {
-        $this->requireSize();
-        return $this->size;
-    }
-    
-    public function getError()
-    {
-        return $this->error;
     }
     
     public function getClientFilename()
@@ -52,8 +39,17 @@ abstract class UploadedFile implements UploadedFileInterface
     
     public function getClientMediaType()
     {
-        $this->requireClientMediaType();
         return $this->clientMediaType;
+    }
+    
+    public function getError()
+    {
+        return $this->error;
+    }
+    
+    public function getSize()
+    {
+        return $this->size;
     }
     
     protected function assertValidUpload()
@@ -63,13 +59,5 @@ abstract class UploadedFile implements UploadedFileInterface
         }
     }
     
-    protected function requireSize()
-    {
-    
-    }
-    
-    protected function requireClientMediaType()
-    {
-    
-    }
+    abstract public function move($path);
 }

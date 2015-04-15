@@ -1,18 +1,17 @@
 <?php
 
-namespace PHPixie\Tests\HTTP\Messages\Streamable;
+namespace PHPixie\Tests\HTTP\Messages\Stream;
 
 /**
- * @coversDefaultClass PHPixie\HTTP\Messages\Streamable\String
+ * @coversDefaultClass PHPixie\HTTP\Messages\Stream\String
  */
-class StringTest extends \PHPixie\Test\Testcase
+class StringTest extends \PHPixie\Tests\HTTP\Messages\StreamTest
 {
     protected $string = 'pixie';
-    protected $stream;
     
     public function setUp()
     {
-        $this->stream = new \PHPixie\HTTP\Messages\Streamable\String($this->string);
+        $this->stream = new \PHPixie\HTTP\Messages\Stream\String($this->string);
     }
     
     /**
@@ -21,7 +20,7 @@ class StringTest extends \PHPixie\Test\Testcase
      */
     public function testConstruct()
     {
-        $stream = new \PHPixie\HTTP\Messages\Streamable\String();
+        $stream = new \PHPixie\HTTP\Messages\Stream\String();
         $this->assertSame('', (string) $stream);
     }
     
@@ -72,13 +71,13 @@ class StringTest extends \PHPixie\Test\Testcase
     {
         $sets = array(
             array('getSize', strlen($this->string)),
-            array('tell', false),
+            array('tell', strlen($this->string)),
             array('eof', true),
             array('isSeekable', false),
             array('isWritable', true),
             array('isReadable', true),
-            array('seek', array('a'), false),
-            array('rewind', false),
+            array('seek', array('a'), 'exception'),
+            array('rewind', 'exception'),
             array('read', array(1), ''),
             array('getContents', ''),
             array('getMetadata', array()),
@@ -95,7 +94,14 @@ class StringTest extends \PHPixie\Test\Testcase
             }
             
             $callback = array($this->stream, $set[0]);
-            $this->assertSame($expect, call_user_func_array($callback, $params));
+            
+            if($expect === 'exception') {
+                $this->assertException(function() use($callback, $params) {
+                    call_user_func_array($callback, $params);
+                }, '\RuntimeException');
+            }else{
+                $this->assertSame($expect, call_user_func_array($callback, $params));
+            }
         }
     }
     

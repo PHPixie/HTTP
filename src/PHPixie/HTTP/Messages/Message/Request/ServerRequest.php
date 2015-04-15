@@ -2,8 +2,18 @@
 
 namespace PHPixie\HTTP\Messages\Message\Request;
 
-abstract class ServerRequest extends \PHPixie\HTTP\Messages\Message\Request
+use Psr\Http\Message\ServerRequestInterface;
+
+abstract class ServerRequest extends    \PHPixie\HTTP\Messages\Message\Request
+                             implements ServerRequestInterface
 {
+    
+    protected $serverParams;
+    protected $queryParams;
+    protected $parsedBody;
+    protected $cookieParams;
+    protected $uploadedFiles;
+    
     protected $attributes = array();
     
     public function getServerParams()
@@ -12,9 +22,10 @@ abstract class ServerRequest extends \PHPixie\HTTP\Messages\Message\Request
         return $this->serverParams;
     }
     
-    public function getFileParams()
+    public function getUploadedFiles()
     {
-        return $this->fileParams;
+        $this->requireUploadedFiles();
+        return $this->uploadedFiles;
     }
     
     public function getCookieParams()
@@ -53,6 +64,13 @@ abstract class ServerRequest extends \PHPixie\HTTP\Messages\Message\Request
         return $new;
     }
     
+    public function withUploadedFiles(array $uploadedFiles)
+    {
+        $new = clone $this;
+        $new->uploadedFiles = $uploadedFiles;
+        return $new;
+    }
+    
     public function getAttributes()
     {
         return $this->attributes;
@@ -84,6 +102,11 @@ abstract class ServerRequest extends \PHPixie\HTTP\Messages\Message\Request
     }
     
     protected function requireServerParams()
+    {
+    
+    }
+    
+    protected function requireUploadedFiles()
     {
     
     }

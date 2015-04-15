@@ -23,11 +23,29 @@ abstract class RequestTest extends \PHPixie\Tests\HTTP\Messages\MessageTest
     public function testUri()
     {
         $uri = $this->getUri();
-        $new = $this->message->withUri($uri);
         
+        $new = $this->message->withUri($uri, true);
         $this->assertInstance($new, array(
             'getUri' => $uri
         ));
+        
+        $this->method($uri, 'getHost', '', array(), 0);
+        $new = $this->message->withUri($uri);
+        $this->assertInstance($new, array(
+            'getUri' => $uri
+        ));
+        
+        $this->method($uri, 'getHost', 'test', array(), 0);
+        $new = $this->message->withUri($uri);
+        $headers = $this->headers;
+        $headers['Host'] = array('test');
+        $this->assertInstance($new, array(
+            'getUri'     => $uri,
+            'getHeaders' => $headers
+        ));
+
+        
+        
     }
     
     /**
@@ -61,6 +79,7 @@ abstract class RequestTest extends \PHPixie\Tests\HTTP\Messages\MessageTest
         $uri = $this->uri;
         if(!$withPath) {
             $this->uri = null;
+            $this->message = $this->message();
             $expected = '/';
             
         }else{

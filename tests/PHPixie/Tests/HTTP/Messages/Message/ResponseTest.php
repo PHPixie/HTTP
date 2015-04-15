@@ -74,7 +74,7 @@ class ResponseTest extends ImplementationTest
         );
     }
     
-    public function message()
+    protected function message()
     {
         return new \PHPixie\HTTP\Messages\Message\Response(
             $this->protocolVersion,

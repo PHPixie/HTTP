@@ -3,9 +3,9 @@
 namespace PHPixie\Tests\HTTP\Messages\URI;
 
 /**
- * @coversDefaultClass PHPixie\HTTP\Messages\URI\Server
+ * @coversDefaultClass PHPixie\HTTP\Messages\URI\SAPI
  */
-class ServerTest extends \PHPixie\Tests\HTTP\Messages\URITest
+class SAPITest extends \PHPixie\Tests\HTTP\Messages\URITest
 {
     protected $fragment = '';
     protected $userInfo = '';
@@ -58,6 +58,6 @@ class ServerTest extends \PHPixie\Tests\HTTP\Messages\URITest
     
     protected function uri()
     {
-        return new \PHPixie\HTTP\Messages\URI\Server($this->server);
+        return new \PHPixie\HTTP\Messages\URI\SAPI($this->server);
     }
 }

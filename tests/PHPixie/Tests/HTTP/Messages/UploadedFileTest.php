@@ -7,7 +7,7 @@ namespace PHPixie\Tests\HTTP\Messages;
  */
 abstract class UploadedFileTest extends \PHPixie\Test\Testcase
 {
-    protected $messages;
+    protected $http;
     
     protected $uploadedFile;
     
@@ -19,7 +19,7 @@ abstract class UploadedFileTest extends \PHPixie\Test\Testcase
     
     public function setUp()
     {
-        $this->messages = $this->quickMock('\PHPixie\HTTP\Messages');
+        $this->http = $this->quickMock('\PHPixie\HTTP');
         
         $this->uploadedFile = $this->uploadedFile();
     }
@@ -41,7 +41,7 @@ abstract class UploadedFileTest extends \PHPixie\Test\Testcase
     public function testGetStream()
     {
         $stream = $this->abstractMock('\Psr\Http\Message\StreamInterface');
-        $this->method($this->messages, 'stream', $stream, array($this->file), 0);
+        $this->method($this->http, 'stream', $stream, array($this->file), 0);
         for($i=0; $i<2; $i++) {
             $this->assertSame($stream, $this->uploadedFile->getStream());
         }
@@ -56,6 +56,29 @@ abstract class UploadedFileTest extends \PHPixie\Test\Testcase
      */
     public function testGetters()
     {
+        $this->gettersTest();
+    }
+    
+    /**
+     * @covers ::getStream
+     * @covers ::move
+     * @covers ::<protected>
+     */
+    public function testInvalidUpload()
+    {
+        $uploadedFile = $this->prepareInvalidUpload();
+        
+        $this->assertException(function() use($uploadedFile) {
+            $uploadedFile->getStream();
+        }, '\RuntimeException');
+        
+        $this->assertException(function() use($uploadedFile) {
+            $uploadedFile->move('test');
+        }, '\RuntimeException');
+    }
+    
+    protected function gettersTest()
+    {
         $getters = array(
             'clientFilename',
             'clientMediaType',
@@ -69,24 +92,6 @@ abstract class UploadedFileTest extends \PHPixie\Test\Testcase
         }
     }
     
-    /**
-     * @covers ::getStream
-     * @covers ::move
-     * @covers ::<protected>
-     */
-    public function testInvalidUpload()
-    {
-        $this->error = 1;
-        $uploadedFile = $this->uploadedFile();
-        
-        $this->assertException(function() use($uploadedFile) {
-            $uploadedFile->getStream();
-        }, '\RuntimeException');
-        
-        $this->assertException(function() use($uploadedFile) {
-            $uploadedFile->move('test');
-        }, '\RuntimeException');
-    }
-    
-    protected abstract function uploadedFile();
+    abstract protected function prepareInvalidUpload();
+    abstract protected function uploadedFile();
 }

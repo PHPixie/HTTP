@@ -21,6 +21,8 @@ class Request extends    \PHPixie\HTTP\Messages\Message
     );
     
     protected $requestTarget;
+    protected $method;
+    protected $uri;
     
     public function getRequestTarget()
     {
@@ -81,10 +83,14 @@ class Request extends    \PHPixie\HTTP\Messages\Message
         return $this->uri;
     }
     
-    public function withUri(UriInterface $uri)
+    public function withUri(UriInterface $uri, $preserveHost = false)
     {
         $new = clone $this;
         $new->uri = $uri;
+        if(!$preserveHost && ($host = $uri->getHost()) !== '') {
+            $new->modifyHeader('Host', $host, false, false);
+        }
+        
         return $new;
     }
     

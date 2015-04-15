@@ -23,7 +23,7 @@ abstract class MessageTest extends \PHPixie\Test\Testcase
     
     public function setUp()
     {
-        $this->body = $this->getStreamable();
+        $this->body = $this->getStream();
         
         $this->message = $this->message();
     }
@@ -55,7 +55,7 @@ abstract class MessageTest extends \PHPixie\Test\Testcase
      */
     public function testBody()
     {
-        $body = $this->getStreamable();
+        $body = $this->getStream();
         $new = $this->message->withBody($body);
         
         $this->assertInstance($new, array(
@@ -82,7 +82,7 @@ abstract class MessageTest extends \PHPixie\Test\Testcase
      * @covers ::getHeaders
      * @covers ::hasHeader
      * @covers ::getHeader
-     * @covers ::getHeaderLines
+     * @covers ::getHeaderLine
      * @covers ::<protected>
      */
     public function testGetHeader()
@@ -91,13 +91,13 @@ abstract class MessageTest extends \PHPixie\Test\Testcase
         
         foreach($this->headers as $name => $lines) {
             $this->assertSame(true, $this->message->hasHeader($name));
-            $this->assertSame(implode(',', $lines), $this->message->getHeader($name));
-            $this->assertSame($lines, $this->message->getHeaderLines($name));
+            $this->assertSame(implode(',', $lines), $this->message->getHeaderLine($name));
+            $this->assertSame($lines, $this->message->getHeader($name));
         }
         
         $this->assertSame(false, $this->message->hasHeader('Pixies'));
-        $this->assertSame(null, $this->message->getHeader('Pixies'));
-        $this->assertSame(array(), $this->message->getHeaderLines('Pixies'));
+        $this->assertSame(null, $this->message->getHeaderLine('Pixies'));
+        $this->assertSame(array(), $this->message->getHeader('Pixies'));
     }
     
     /**
@@ -139,10 +139,12 @@ abstract class MessageTest extends \PHPixie\Test\Testcase
      */
     public function testWithoutHeader()
     {
-        $new = $this->message->withoutHeader('Name');
+        $new = $this->message->withoutHeader('Missing');
+        $this->assertInstance($new);
         
+        $new = $this->message->withoutHeader('pixie-Name');
         $headers = $this->headers;
-        unset($headers['Name']);
+        unset($headers['Pixie-Name']);
         
         $this->assertInstance($new, array(
             'getHeaders' => $headers
@@ -171,10 +173,10 @@ abstract class MessageTest extends \PHPixie\Test\Testcase
         );
     }
     
-    protected function getStreamable()
+    protected function getStream()
     {
-        return $this->abstractMock('\Psr\Http\Message\StreamableInterface');
+        return $this->abstractMock('\Psr\Http\Message\StreamInterface');
     }
     
-    abstract public function message();
+    abstract protected function message();
 }

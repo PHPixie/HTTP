@@ -7,18 +7,17 @@ namespace PHPixie\Tests\HTTP\Messages\Message\Request;
  */
 abstract class ServerRequestTest extends \PHPixie\Tests\HTTP\Messages\Message\RequestTest
 {
-    protected $serverParams = array();
-    protected $queryParams  = array();
-    protected $parsedBody   = array();
-    protected $cookieParams = array();
-    protected $fileParams   = array();
+    protected $serverParams  = array();
+    protected $queryParams   = array();
+    protected $parsedBody    = array();
+    protected $cookieParams  = array();
+    protected $uploadedFiles = array();
     
     protected $parameterNames = array(
         'serverParams',
         'queryParams',
         'parsedBody',
         'cookieParams',
-        'fileParams',
     );
     
     protected $attributes = array(
@@ -28,10 +27,18 @@ abstract class ServerRequestTest extends \PHPixie\Tests\HTTP\Messages\Message\Re
     
     public function setUp()
     {
-        foreach($this->parameterNames as $name) {
+        foreach($this->parameterNames as $name) {            
             $array = &$this->$name;
-            $arr[$name] = 'Pixie';
+            $array[$name] = 'Pixie';
         }
+        
+        $this->uploadedFiles = array(
+            'pixie' => $this->getUploadedFile(),
+            'fairy' => array(
+                $this->getUploadedFile(),
+                $this->getUploadedFile()
+            )
+        );
         
         parent::setUp();
     }
@@ -44,15 +51,22 @@ abstract class ServerRequestTest extends \PHPixie\Tests\HTTP\Messages\Message\Re
      */
     public function testWithParams()
     {
-        $value = array('test' => 'Pixie');
-        
         $params = array(
             'queryParams',
             'parsedBody',
-            'cookieParams'
+            'cookieParams',
+            'uploadedFiles'
         );
         
         foreach($params as $name) {
+            if($name === 'uploadedFiles') {
+                $value = $this->getUploadedFile();
+                
+            }else{
+                $value = 'Pixie';
+            }
+            
+            $value = array('test' => $value);
             $method = 'with'.ucfirst($name);
             $new = $this->message->$method($value);        
             $this->assertInstance($new, array(
@@ -92,6 +106,19 @@ abstract class ServerRequestTest extends \PHPixie\Tests\HTTP\Messages\Message\Re
     }
     
     /**
+     * @covers ::withUploadedFiles
+     * @covers ::<protected>
+     */
+    public function testWithUploadedFiles()
+    {
+        $uploadedFiles = array('pixie' => $this->getUploadedFile());
+        $new = $this->message->withUploadedFiles($uploadedFiles);
+        $this->assertInstance($new, array(
+            'getUploadedFiles' => $uploadedFiles
+        ));
+    }
+    
+    /**
      * @covers ::withoutAttribute
      * @covers ::<protected>
      */
@@ -114,7 +141,13 @@ abstract class ServerRequestTest extends \PHPixie\Tests\HTTP\Messages\Message\Re
             $methodMap['get'.ucfirst($name)] = $this->$name;
         }
         
+        $methodMap['getUploadedFiles'] = $this->uploadedFiles;
         $methodMap['getAttributes'] = $this->attributes;
         return $methodMap;
+    }
+    
+    protected function getUploadedFile()
+    {
+        return $this->abstractMock('\Psr\Http\Message\UploadedFileInterface');
     }
 }

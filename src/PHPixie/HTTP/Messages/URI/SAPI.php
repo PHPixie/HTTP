@@ -2,7 +2,7 @@
 
 namespace PHPixie\HTTP\Messages\URI;
 
-class Server extends \PHPixie\HTTP\Messages\URI
+class SAPI extends \PHPixie\HTTP\Messages\URI
 {
     protected $server;
     
