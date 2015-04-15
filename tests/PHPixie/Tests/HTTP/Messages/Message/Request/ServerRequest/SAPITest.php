@@ -13,7 +13,7 @@ class SAPITest extends \PHPixie\Tests\HTTP\Messages\Message\Request\ServerReques
 
     public function setUp()
     {
-        $this->http = $this->quickMock('\PHPixie\HTTP');
+        $this->messages = $this->quickMock('\PHPixie\HTTP\Messages');
         
         $this->serverParams['HTTP_COOKIE']     = 'test';
         $this->serverParams['REQUEST_METHOD']  = $this->method;
@@ -32,8 +32,8 @@ class SAPITest extends \PHPixie\Tests\HTTP\Messages\Message\Request\ServerReques
         
         parent::setUp();
         
-        $this->method($this->http, 'sapiUri', $this->uri, array());
-        $this->method($this->http, 'stream', $this->body, array('php://input'));
+        $this->method($this->messages, 'sapiUri', $this->uri, array());
+        $this->method($this->messages, 'stream', $this->body, array('php://input'));
     }
     
     protected function getFileParams()
@@ -69,7 +69,7 @@ class SAPITest extends \PHPixie\Tests\HTTP\Messages\Message\Request\ServerReques
             }
         }
         
-        $this->method($this->http, 'sapiUploadedFile', function($data) use($fileParamsFlat, $uploadedFiles) {
+        $this->method($this->messages, 'sapiUploadedFile', function($data) use($fileParamsFlat, $uploadedFiles) {
             foreach($fileParamsFlat as $key => $fileData) {
                 if($fileData === $data) {
                     return $uploadedFiles[$key];
@@ -111,7 +111,7 @@ class SAPITest extends \PHPixie\Tests\HTTP\Messages\Message\Request\ServerReques
     protected function message()
     {
         return new \PHPixie\HTTP\Messages\Message\Request\ServerRequest\SAPI(
-            $this->http,
+            $this->messages,
             $this->serverParams,
             $this->queryParams,
             $this->parsedBody,

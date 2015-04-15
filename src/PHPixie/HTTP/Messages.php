@@ -1,8 +1,8 @@
 <?php
 
-namespace PHPixie;
+namespace PHPixie\HTTP;
 
-class HTTP
+class Messages
 {
     public function stream($file){}
     public function sapiUploadedFile($data){}

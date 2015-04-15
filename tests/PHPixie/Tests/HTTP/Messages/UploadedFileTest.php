@@ -19,7 +19,7 @@ abstract class UploadedFileTest extends \PHPixie\Test\Testcase
     
     public function setUp()
     {
-        $this->http = $this->quickMock('\PHPixie\HTTP');
+        $this->messages = $this->quickMock('\PHPixie\HTTP\Messages');
         
         $this->uploadedFile = $this->uploadedFile();
     }
@@ -41,7 +41,7 @@ abstract class UploadedFileTest extends \PHPixie\Test\Testcase
     public function testGetStream()
     {
         $stream = $this->abstractMock('\Psr\Http\Message\StreamInterface');
-        $this->method($this->http, 'stream', $stream, array($this->file), 0);
+        $this->method($this->messages, 'stream', $stream, array($this->file), 0);
         for($i=0; $i<2; $i++) {
             $this->assertSame($stream, $this->uploadedFile->getStream());
         }

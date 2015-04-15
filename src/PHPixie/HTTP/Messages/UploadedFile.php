@@ -7,7 +7,7 @@ use RuntimeException;
 
 abstract class UploadedFile implements UploadedFileInterface
 {
-    protected $http;
+    protected $messages;
     
     protected $clientFilename;
     protected $clientMediaType;
@@ -17,16 +17,16 @@ abstract class UploadedFile implements UploadedFileInterface
     
     protected $stream;
     
-    public function __construct($http)
+    public function __construct($messages)
     {
-        $this->http = $http;
+        $this->messages = $messages;
     }
     
     public function getStream()
     {
         if($this->stream === null) {
             $this->assertValidUpload();
-            $this->stream = $this->http->stream($this->file);
+            $this->stream = $this->messages->stream($this->file);
         }
         
         return $this->stream;

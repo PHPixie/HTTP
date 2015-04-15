@@ -34,7 +34,7 @@ class SAPITest extends \PHPixie\Tests\HTTP\Messages\UploadedFileTest
     public function testMoveUploadedFile()
     {
         $uploadedFile = new \PHPixie\HTTP\Messages\UploadedFile\SAPI(
-            $this->http,
+            $this->messages,
             $this->getFileData()
         );
         
@@ -60,7 +60,7 @@ class SAPITest extends \PHPixie\Tests\HTTP\Messages\UploadedFileTest
             '\PHPixie\HTTP\Messages\UploadedFile\SAPI',
             array('moveUploadedFile'),
             array(
-                $this->http,
+                $this->messages,
                 $this->getFileData()
             )
         );

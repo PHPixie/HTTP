@@ -9,7 +9,7 @@ class SAPI extends \PHPixie\HTTP\Messages\Message\Request\ServerRequest
     
     public function __construct($http, $server, $get, $post, $cookies, $files, $attributes = array())
     {
-        $this->http     = $http;
+        $this->messages     = $http;
         
         $this->serverParams = $server;
         $this->queryParams  = $get;
@@ -78,12 +78,12 @@ class SAPI extends \PHPixie\HTTP\Messages\Message\Request\ServerRequest
                     foreach($keys as $key) {
                         $normalized[$key] = $data[$key][$i];
                     }
-                    $values[] = $this->http->sapiUploadedFile($normalized);
+                    $values[] = $this->messages->sapiUploadedFile($normalized);
                 }
                 
                 $uploadedFiles[$name] = $values;
             }else{
-                $uploadedFiles[$name] = $this->http->sapiUploadedFile($data);
+                $uploadedFiles[$name] = $this->messages->sapiUploadedFile($data);
             }
         }
         
@@ -102,14 +102,14 @@ class SAPI extends \PHPixie\HTTP\Messages\Message\Request\ServerRequest
     protected function requireBody()
     {
         if($this->body === null) {
-            $this->body = $this->http->stream('php://input');
+            $this->body = $this->messages->stream('php://input');
         }
     }
     
     protected function requireUri()
     {
         if($this->uri === null) {
-            $this->uri = $this->http->sapiUri();
+            $this->uri = $this->messages->sapiUri();
         }
     }
 }

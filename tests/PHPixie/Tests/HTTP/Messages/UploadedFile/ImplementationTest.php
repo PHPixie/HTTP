@@ -31,7 +31,7 @@ class ImplementationTest extends \PHPixie\Tests\HTTP\Messages\UploadedFileTest
         $this->size            = filesize($this->file);
         
         $this->uploadedFile = new \PHPixie\HTTP\Messages\UploadedFile\Implementation(
-            $this->http,
+            $this->messages,
             $this->file
         );
         
@@ -128,7 +128,7 @@ class ImplementationTest extends \PHPixie\Tests\HTTP\Messages\UploadedFileTest
         $this->prepareFile();
         
         $uploadedFile = new \PHPixie\HTTP\Messages\UploadedFile\Implementation(
-            $this->http,
+            $this->messages,
             $this->file
         );
         
@@ -154,7 +154,7 @@ class ImplementationTest extends \PHPixie\Tests\HTTP\Messages\UploadedFileTest
     protected function uploadedFile($withParams = false)
     {
         $params = array(
-            $this->http,
+            $this->messages,
             $this->file
         );
         
