@@ -38,18 +38,20 @@ class Cookies
         if($lifetime !== null) {
             $expires = time() + $lifetime;
             
-            if($lifetime > 0) {
-                $this->cookies[$name] = $value;
-            }else {
-                unset($this->cookies[$name]);
-            }
-            
         }else{
             $expires = null;
         }
         
-        $this->updates[] = $this->builder->cookiesUpdate(
+        if($lifetime < 0) {
+            unset($this->cookies[$name]);
+            
+        }else {
+            $this->cookies[$name] = $value;            
+        }
+        
+        $this->updates[$name] = $this->builder->cookiesUpdate(
             $name,
+            $value,
             $expires,
             $path,
             $domain,
@@ -63,13 +65,18 @@ class Cookies
         $this->set($name, null, -3600*24*30);
     }
     
-    public function exists()
+    public function exists($name)
     {
         return array_key_exists($name, $this->cookies);
     }
     
-    public function getUpdates()
+    public function updates()
     {
-        return $this->updates;
+        return array_values($this->updates);
+    }
+    
+    public function asArray()
+    {
+        return $this->cookies;
     }
 }
