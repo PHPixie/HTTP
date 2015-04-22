@@ -1,6 +1,6 @@
 <?php
 
-namespace PHPixie\HTTP;
+namespace PHPixie\HTTP\Data;
 
 class Headers
 {

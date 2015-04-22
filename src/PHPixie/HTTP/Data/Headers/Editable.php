@@ -1,8 +1,8 @@
 <?php
 
-namespace PHPixie\HTTP\Headers;
+namespace PHPixie\HTTP\Data\Headers;
 
-class Editable extends \PHPixie\HTTP\Headers
+class Editable extends \PHPixie\HTTP\Data\Headers
 {
     public function set($name, $value)
     {

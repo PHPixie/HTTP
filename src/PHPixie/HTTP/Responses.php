@@ -23,7 +23,7 @@ class Responses
             array(
                 'Location' => $url
             ),
-            302
+            $statusCode
         );
     }
     
@@ -40,44 +40,49 @@ class Responses
             )
         );
     }
-    
-    public function stream($file)
-    {
-        return $this->fileResponse($file);   
-    }
 
-    public function download($string, $fileName, $contentType)
-    {
-        $body = $this->builder->messages()->stringStream($string);
-        return $this->downloadResponse($body, $fileName, $contentType);   
-    }
-    
-    public function downloadFile($file, $fileName, $contentType)
+    public function streamFile($file)
     {
         $body = $this->builder->messages()->stream($file);
-        return $this->downloadResponse($body, $fileName, $contentType);   
+        return $this->response($body);
     }
     
-    public function response($body, $headers = array(), $statusCode = 200, $reasonPhrase = null)
+    public function download($fileName, $contentType, $contents)
     {
-        $headers = $this->builder->headers($headers);
-        return new Responses\Response($headers, $body, $statusCode, $reasonPhrase);
+        $body = $this->builder->messages()->stringStream($contents);
+        return $this->downloadResponse($fileName, $contentType, $body);
     }
     
-    protected function downloadResponse($body, $fileName, $contentType)
+    public function downloadFile($fileName, $contentType, $file)
     {
-        return $this->response(
-            $body,
-            array(
-                'Content-Type' => $coontentType,
-                'Content-Disposition' => 'attachment; filename="'.$fileName.'"'
-            )
-        );
+        $body = $this->builder->messages()->stream($file);
+        return $this->downloadResponse($fileName, $contentType, $body);
+    }
+    
+    public function response($body, $headerArray = array(), $statusCode = 200, $reasonPhrase = null)
+    {
+        $headers = $this->builder->editableHeaders($headerArray);
+        return $this->buildResponse($headers, $body, $statusCode, $reasonPhrase);
     }
     
     protected function stringResponse($string, $headers = array(), $statusCode = 200)
     {
         $body = $this->builder->messages()->stringStream($string);
-        return $this->builder->response($body, $headers, $statusCode);
+        return $this->response($body, $headers, $statusCode);
+    }
+    
+    protected function downloadResponse($fileName, $contentType, $body)
+    {
+        $headers = array(
+            'Content-Type' => $contentType,
+            'Content-Disposition' => 'attachment; filename="'.$fileName.'"'
+        );
+        
+        return $this->response($body, $headers);
+    }
+    
+    protected function buildResponse($headers, $body, $statusCode = 200, $reasonPhrase = null)
+    {
+        return new Responses\Response($headers, $body, $statusCode, $reasonPhrase);
     }
 }
