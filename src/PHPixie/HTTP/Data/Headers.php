@@ -4,12 +4,14 @@ namespace PHPixie\HTTP;
 
 class Headers
 {
-    protected $headers;
+    protected $headers = array();
     protected $names;
     
     public function __construct($headers = array())
     {
-        $this->headers = $headers;
+        foreach($headers as $key => $value) {
+            $this->headers[$key] = $this->normalizeValue($value);
+        }
     }
     
     public function get($name, $default = '')

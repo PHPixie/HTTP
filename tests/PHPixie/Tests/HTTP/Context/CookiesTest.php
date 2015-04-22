@@ -70,8 +70,8 @@ class CookiesTest extends \PHPixie\Test\Testcase
         }
         
         $cookies = $this->cookies;
-        $this->assertException(function(){
-            $this->cookies->getRequired('trixie');
+        $this->assertException(function() use($cookies){
+            $cookies->getRequired('trixie');
         }, '\PHPixie\HTTP\Exception');
     }
     

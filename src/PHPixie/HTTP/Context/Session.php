@@ -5,13 +5,13 @@ namespace PHPixie\HTTP\Context;
 interface Session
 {
     public function id();
-    public function setId();
+    public function setId($id);
     
-    public function get($name, $default = null);
-    public function getRequired($name);
-    public function exists($name);
-    public function set($name, $value);
-    public function remove($name);
+    public function get($key, $default = null);
+    public function getRequired($key);
+    public function exists($key);
+    public function set($key, $value);
+    public function remove($key);
     
     public function asArray();
 }
