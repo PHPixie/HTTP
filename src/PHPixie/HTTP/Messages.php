@@ -57,18 +57,18 @@ class Messages
         $server     = null,
         $get        = null,
         $post       = null,
-        $cookies    = null,
+        $cookie     = null,
         $files      = null,
         $attributes = array()
     )
     {   
         return new Messages\Message\Request\ServerRequest\SAPI(
             $this,
-            $server  !== null ? $server : $_SERVER,
-            $get     !== null ? $server : $_GET,
-            $post    !== null ? $server : $_POST,
-            $cookies !== null ? $server : $_COOKIES,
-            $files   !== null ? $server : $_FILES,
+            $server !== null ? $server  : $_SERVER,
+            $get    !== null ? $get     : $_GET,
+            $post   !== null ? $post    : $_POST,
+            $cookie !== null ? $cookie  : $_COOKIE,
+            $files  !== null ? $files   : $_FILES,
             $attributes
         );
     }

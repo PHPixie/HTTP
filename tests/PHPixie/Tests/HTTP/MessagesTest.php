@@ -20,13 +20,10 @@ class MessagesTest extends \PHPixie\Test\Testcase
      */
     public function testMessage()
     {
-        $params = $this->getMessageParams();
-        
-        $message = call_user_func_array(array($this->messages, 'message'), $params);
-        $this->assertInstance(
-            $message,
+        $this->instanceTest(
+            'message',
             '\PHPixie\HTTP\Messages\Message\Implementation',
-            $params
+            $this->getMessageParams()
         );
     }
     
@@ -36,13 +33,10 @@ class MessagesTest extends \PHPixie\Test\Testcase
      */
     public function testRequest()
     {
-        $params = $this->getRequestParams();
-        
-        $message = call_user_func_array(array($this->messages, 'request'), $params);
-        $this->assertInstance(
-            $message,
+        $this->instanceTest(
+            'request',
             '\PHPixie\HTTP\Messages\Message\Request\Implementation',
-            $params
+            $this->getRequestParams()
         );
     }
     
@@ -52,24 +46,61 @@ class MessagesTest extends \PHPixie\Test\Testcase
      */
     public function testServerRequest()
     {
-        $params = $this->getServerRequestParams();
-        
-        $message = call_user_func_array(array($this->messages, 'serverRequest'), $params);
-        $this->assertInstance(
-            $message,
-            '\PHPixie\HTTP\Messages\Message\Request\ServerRequest\Implementation',
-            $params
+        $params = array_merge(
+            $this->getRequestParams(),
+            $this->getArrayParams(array(
+                'serverParams',
+                'queryParams',
+                'parsedBody',
+                'cookieParams',
+                'uploadedFiles',
+                'attributes'
+            ))
         );
         
-        $shortParams = $params;
-        unset($shortParams['attributes']);
-        $params['attributes'] = array();
-        
-        $message = call_user_func_array(array($this->messages, 'serverRequest'), $shortParams);
-        $this->assertInstance(
-            $message,
+        $this->instanceTest(
+            'serverRequest',
             '\PHPixie\HTTP\Messages\Message\Request\ServerRequest\Implementation',
-            $params
+            $params,
+            array(
+                'attributes' => array()
+            )
+        );
+    }
+    
+    /**
+     * @covers ::sapiServerRequest
+     * @covers ::<protected>
+     */
+    public function testSapiServerRequest()
+    {
+        $params = $this->getArrayParams(array(
+            'serverParams',
+            'queryParams',
+            'parsedBody',
+            'cookieParams',
+            'fileParams',
+            'attributes'
+        ));
+        
+        $params['serverParams']['REQUEST_METHOD'] = 'GET';
+
+        $this->instanceTest(
+            'sapiServerRequest',
+            '\PHPixie\HTTP\Messages\Message\Request\ServerRequest\SAPI',
+            $params,
+            array(
+                'serverParams' => $_SERVER = array('REQUEST_METHOD' => 'GET'),
+                'queryParams'  => $_GET    = array('get'    => 1),
+                'parsedBody'   => $_POST   = array('post'   => 1),
+                'cookieParams' => $_COOKIE = array('cookie' => 1),
+                'fileParams'   => $_FILES  = array('files'  => 1),
+                'attributes'   => array()
+            ),
+            array(
+                'messages' => $this->messages,
+                'method'   => 'GET'
+            )
         );
     }
     
@@ -79,26 +110,14 @@ class MessagesTest extends \PHPixie\Test\Testcase
      */
     public function testResponse()
     {
-        $params = $this->getResponseParams();
-        
-        $message = call_user_func_array(array($this->messages, 'response'), $params);
-        $this->assertInstance(
-            $message,
+        $this->instanceTest(
+            'response',
             '\PHPixie\HTTP\Messages\Message\Response',
-            $params
-        );
-        
-        $shortParams = $params;
-        unset($shortParams['statusCode']);
-        unset($shortParams['reasonPhrase']);
-        $params['statusCode']   = 200;
-        $params['reasonPhrase'] = 'OK';
-        
-        $message = call_user_func_array(array($this->messages, 'response'), $shortParams);
-        $this->assertInstance(
-            $message,
-            '\PHPixie\HTTP\Messages\Message\Response',
-            $params
+            $this->getResponseParams(),
+            array(
+                'statusCode'   => 200,
+                'reasonPhrase' => 'OK',
+            )
         );
     }
     
@@ -108,24 +127,14 @@ class MessagesTest extends \PHPixie\Test\Testcase
      */
     public function testStream()
     {
-        $uri = 'fairy.png';
-        
-        $stream = $this->messages->stream($uri, 'w');
-        $this->assertInstance(
-            $stream,
+        $this->instanceTest(
+            'stream',
             '\PHPixie\HTTP\Messages\Stream\Implementation',
             array(
-                'uri' => $uri,
+                'uri'  => 'fairy.png',
                 'mode' => 'w'
-            )
-        );
-        
-        $stream = $this->messages->stream($uri);
-        $this->assertInstance(
-            $stream,
-            '\PHPixie\HTTP\Messages\Stream\Implementation',
+            ),
             array(
-                'uri' => $uri,
                 'mode' => 'r'
             )
         );
@@ -156,18 +165,101 @@ class MessagesTest extends \PHPixie\Test\Testcase
         );
     }
     
-    protected function getServerRequestParams()
+    /**
+     * @covers ::uri
+     * @covers ::<protected>
+     */
+    public function testUri()
     {
-        $params = $this->getRequestParams();
+        $uri = $this->messages->uri('http://phpixie.com');
+        $this->assertInstance($uri, '\PHPixie\HTTP\Messages\URI\Implementation', array(
+            'parts' => array(
+                'scheme' => 'http',
+                'host'   => 'phpixie.com'
+            )
+        ));
+    }
+    
+    /**
+     * @covers ::sapiUri
+     * @covers ::<protected>
+     */
+    public function testSapiUri()
+    {
+        $server = array('a' => 1);
         
-        $names = array(
-            'serverParams',
-            'queryParams',
-            'parsedBody',
-            'cookieParams',
-            'uploadedFiles',
-            'attributes'
+        $this->instanceTest(
+            'sapiUri',
+            '\PHPixie\HTTP\Messages\URI\SAPI',
+            array(
+                'server'  => array('a' => 1),
+            ),
+            array(
+                'server'  => $_SERVER = array('server' => 1),
+            )
         );
+    }
+    
+    /**
+     * @covers ::uploadedFile
+     * @covers ::<protected>
+     */
+    public function testUploadedFile()
+    {
+        $this->instanceTest(
+            'uploadedFile',
+            '\PHPixie\HTTP\Messages\UploadedFile\Implementation',
+            array(
+                'file'            => 'pixie.png',
+                'clientFilename'  => 'fairy',
+                'clientMediaType' => 'image/png',
+                'size'            => 300,
+                'error'           => 1,
+            ),
+            array(
+                'clientFilename'  => null,
+                'clientMediaType' => null,
+                'size'            => null,
+                'error'           => null,
+            ),
+            array(
+                'messages' => $this->messages,
+            )
+        );
+    }
+    
+    
+    /**
+     * @covers ::sapiUploadedFile
+     * @covers ::<protected>
+     */
+    public function testSapiUploadedFile()
+    {
+        $fileData = array(
+            'name'     => 'fairy',
+            'type'     => 'image/png',
+            'tmp_name' => 'pixie.png',
+            'error'    => 1,
+            'size'     => 300
+        );
+        
+        $this->assertInstance(
+            $this->messages->sapiUploadedFile($fileData),
+            '\PHPixie\HTTP\Messages\UploadedFile\SAPI',
+            array(
+                'messages' => $this->messages,
+                'file'            => 'pixie.png',
+                'clientFilename'  => 'fairy',
+                'clientMediaType' => 'image/png',
+                'size'            => 300,
+                'error'           => 1,
+            )
+        );
+    }
+    
+    protected function getArrayParams($names)
+    {
+        $params = array();
         foreach($names as $name) {
             $params[$name] = array($name => 1);
         }
@@ -204,6 +296,25 @@ class MessagesTest extends \PHPixie\Test\Testcase
             'headers' => array('a' => 1),
             'body'    => $this->getStream()
         );
+    }
+    
+    protected function instanceTest($method, $class, $params, $defaults = array(), $overrides = array())
+    {
+        $propertyMap = array_merge($params, $overrides);
+        $instance = call_user_func_array(array($this->messages, $method), $params);
+        $this->assertInstance($instance, $class, $propertyMap);
+        
+        if(!empty($defaults)) {
+            $shortParams = $params;
+            foreach($defaults as $key => $value) {
+                unset($shortParams[$key]);
+                $params[$key] = $value;
+            }
+            
+            $propertyMap = array_merge($params, $overrides);
+            $instance = call_user_func_array(array($this->messages, $method), $params);
+            $this->assertInstance($instance, $class, $propertyMap);
+        }
     }
     
     protected function getStream()

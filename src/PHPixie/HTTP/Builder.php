@@ -12,4 +12,14 @@ class Builder
     
     public function messages()
     {}
+    
+    
+    public function data()
+    {}
+    
+    public function headers()
+    {}
+    public function serverData()
+    {}
+
 }

@@ -5,50 +5,76 @@ namespace PHPixie\HTTP;
 class Request
 {
     protected $serverRequest;
-    protected $dataMap;
-    
+    protected $dataMap = array();
     protected $dataMethods = array(
         'query'      => 'getQueryParams',
         'data'       => 'getParsedBody',
         'attributes' => 'getAttributes',
+        'uploads'    => 'getFileUploads',
     );
     
-    public function __construct($serverRequest)
+    protected $server;
+    protected $headers;
+    
+    public function __construct($builder, $serverRequest)
     {
-        $this->serverRequest =  $serverRequest;
+        $this->builder       = $builder;
+        $this->serverRequest = $serverRequest;
     }
     
     public function query()
     {
-        $this->getData('query');
+        return $this->getData('query');
     }
     
     public function data()
     {
-        $this->getData('data');
+        return $this->getData('data');
     }
     
     public function attributes()
     {
-        $this->getData('attributes');
+        return $this->getData('attributes');
+    }
+    
+    public function uploads()
+    {
+        return $this->getData('uploads');
     }
     
     public function server()
     {
-       
+        if($this->server === null) {
+            $data = $this->serverRequest->getServerParams();
+            $this->server = $this->builder->serverData($data);
+        }
+        
+        return $this->server;
     }
     
-
-    
-    public function header($name, $default = null)
+    public function headers()
     {
-        return $this->serverRequest=?
+        if($this->headers === null) {
+            $data = $this->serverRequest->getHeaders();
+            $this->headers = $this->builder->headers($data);
+        }
+        
+        return $this->headers;
     }
     
-    
-    protected f
-    public function url()
+    public function serverRequest()
     {
-        return $this->
+        return $this->serverRequest;
+    }
+    
+    protected function getData($type)
+    {
+        if(!array_key_exists($type, $this->dataMap)) {
+            $method = $this->dataMethods[$type];
+            $data = $this->serverRequest->$method();
+            $this->dataMap[$type] = $this->builder->data($data);
+        }
+        
+        return $this->dataMap[$type];
     }
 }
