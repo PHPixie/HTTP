@@ -4,12 +4,12 @@ namespace PHPixie\HTTP\Messages\Message\Request\ServerRequest;
 
 class SAPI extends \PHPixie\HTTP\Messages\Message\Request\ServerRequest
 {
-    protected $http;
+    protected $messages;
     protected $fileParams;
     
-    public function __construct($http, $server, $get, $post, $cookies, $files, $attributes = array())
+    public function __construct($messages, $server, $get, $post, $cookies, $files, $attributes = array())
     {
-        $this->messages     = $http;
+        $this->messages     = $messages;
         
         $this->serverParams = $server;
         $this->queryParams  = $get;
@@ -109,7 +109,7 @@ class SAPI extends \PHPixie\HTTP\Messages\Message\Request\ServerRequest
     protected function requireUri()
     {
         if($this->uri === null) {
-            $this->uri = $this->messages->sapiUri();
+            $this->uri = $this->messages->sapiUri($this->serverParams);
         }
     }
 }

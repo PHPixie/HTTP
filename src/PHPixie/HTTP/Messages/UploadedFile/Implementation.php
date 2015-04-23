@@ -6,9 +6,16 @@ use RuntimeException;
 
 class Implementation extends \PHPixie\HTTP\Messages\UploadedFile
 {
-    public function __construct($http, $file, $clientFilename = null, $clientMediaType = null, $size = null, $error = 0)
+    public function __construct(
+        $messages,
+        $file,
+        $clientFilename = null,
+        $clientMediaType = null,
+        $size = null,
+        $error = UPLOAD_ERR_OK
+    )
     {
-        parent::__construct($http);
+        parent::__construct($messages);
         
         $this->file            = $file;
         $this->clientFilename  = $clientFilename;

@@ -7,7 +7,7 @@ use RuntimeException;
 
 class Implementation implements StreamInterface
 {
-    protected $name;
+    protected $uri;
     protected $mode;
     
     protected $resource;
@@ -17,9 +17,9 @@ class Implementation implements StreamInterface
     protected $isWritable;
     protected $isSeekable;
         
-    public function __construct($name, $mode = 'r')
+    public function __construct($uri, $mode = 'r')
     {
-        $this->name = $name;
+        $this->uri = $uri;
         $this->mode = $mode;
     }
     
@@ -28,7 +28,7 @@ class Implementation implements StreamInterface
         if(!$this->processed) {
             
             if($this->resource !== false) {
-                $this->resource = fopen($this->name, $this->mode);
+                $this->resource = fopen($this->uri, $this->mode);
             }
             
             $this->processed = true;
