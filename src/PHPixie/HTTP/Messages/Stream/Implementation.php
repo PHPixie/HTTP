@@ -23,7 +23,7 @@ class Implementation implements StreamInterface
         $this->mode = $mode;
     }
     
-    protected function resource($throwIfDetached = false)
+    public function resource($throwIfDetached = false)
     {
         if(!$this->processed) {
             
@@ -189,4 +189,6 @@ class Implementation implements StreamInterface
         
         return $metadata[$key];
     }
+    
+    
 }

@@ -8,26 +8,89 @@ namespace PHPixie\Tests\HTTP;
 class OutputTest extends \PHPixie\Test\Testcase
 {
     protected $output;
+    protected $file;
     
     public function setUp()
     {
+        $this->file = tempnam(sys_get_temp_dir(), 'http_output_test');
         $this->output = $this->getMock(
             '\PHPixie\HTTP\Output',
-            array(),
             array(
                 'header',
                 'setCookie',
-                'fpassthru',
-                'echo'
+                'output',
+                'fpassthru'
             )
         );
     }
     
+    public function tearDown()
+    {
+        if(file_exists($this->file)) {
+            unlink($this->file);
+        }
+    }
+    
     /**
-     * @covers ::response
+     * @covers ::responseMessage
      * @covers ::<protected>
      */
-    public function testResponse()
+    public function testResponseMessage()
+    {
+        $this->responseMessageTest('1.0', 'string');
+        $this->responseMessageTest(null, 'file');
+    }
+    
+    /**
+     * @runInSeparateProcess
+     * @covers ::<protected>
+     */
+    public function testMethods()
+    {
+        $this->output = new \PHPixie\HTTP\Output();
+        $this->methodsTest('string');
+        $this->methodsTest('file');
+    }
+    
+    protected function responseMessageTest($protocolVersion, $bodyType)
+    {
+        $at = 0;
+        $this->prepareStatusHeader(200, 'OK', $protocolVersion, $at);
+        $headers = $this->prepareHeaders($at);
+        $body = $this->prepareBody($bodyType, $at);
+        
+        $responseMessage = $this->responseMessage($protocolVersion, 200, 'OK', $headers, $body);
+        $this->output->responseMessage($responseMessage);
+    }
+    
+    protected function methodsTest($bodyType)
+    {
+        $headers = array(
+            'Pixie' => array('fairy')
+        );
+        
+        if($bodyType === 'file') {
+            $handle = fopen($this->file, 'r');
+            $body = $this->prepareResourceStream($handle);
+            
+        }else{
+            $body = $this->preparePsrStream('string', 'test');
+        }
+        
+        $responseMessage = $this->responseMessage('1.1', 200, 'OK', $headers, $body);
+        $this->output->responseMessage($responseMessage);
+    }
+    
+    protected function prepareStatusHeader($statusCode, $reasonPhrase, $protocolVersion, &$at)
+    {
+        if($protocolVersion === null) {
+            $protocolVersion = '1.1';
+        }
+        
+        $this->prepareMethod('header', array("HTTP/{$protocolVersion} $statusCode $reasonPhrase"), $at);
+    }
+    
+    protected function prepareHeaders(&$at)
     {
         $headers = array(
             'pixie' => array(
@@ -38,27 +101,63 @@ class OutputTest extends \PHPixie\Test\Testcase
                 'Stella'
             )
         );
-        $body = $this->getStream();
         
-        $response = $this->response(
-            $headers,
-            $body,
-            200,
-            'OK'
-        );
+        foreach($headers as $name => $lines) {
+            foreach($lines as $line) {
+                $this->prepareMethod('header', array("$name: $line", false), $at);
+            }
+        }
+        
+        return $headers;
     }
     
-    protected function response($headerArray, $body, $statusCode, $reasonPhrase)
+    protected function prepareBody($type, &$at)
     {
-        $headers = $this->getHeaders();
-        $this->method($headers, 'headerArray', $headerArray, array());
+        if($type === 'file') {
+            $handle = fopen($this->file, 'r');
+            $body = $this->prepareResourceStream($handle);
+            $this->prepareMethod('fpassthru', array($handle), $at);
+            
+        }else{
+            $body = $this->preparePsrStream('test');
+            $this->prepareMethod('output', array('test'), $at);
+        }
         
-        $response = $this->quickMock('\PHPixie\HTTP\Responses\Response');
+        return $body;
+    }
+    
+    protected function prepareResourceStream($handle)
+    {
+        $stream = $this->getStream();
+        file_put_contents('test', $this->file);
+        
+        $this->method($stream, 'rewind', null, array(), 0);
+        $this->method($stream, 'resource', $handle, array(), 1);
+        
+        return $stream;
+    }
+    
+    protected function preparePsrStream($string)
+    {
+        $stream = $this->getPsrStream();
+        $this->method($stream, '__toString', $string, array(), 0);
+        return $stream;
+    }
+    
+    protected function prepareMethod($method, $params, &$at)
+    {
+        $this->method($this->output, $method, null, $params, $at++);
+    }
+    
+    protected function responseMessage($protocolVersion, $statusCode, $reasonPhrase, $headerArray, $body)
+    {
+        $response = $this->quickMock('\Psr\Http\Message\ResponseInterface');
         $methods = array(
-            'headers'      => $headers,
-            'body'         => $body,
-            'statusCode'   => $statusCode,
-            'reasonPhrase' => $reasonPhrase
+            'getProtocolVersion' => $protocolVersion,
+            'getStatusCode'      => $statusCode,
+            'getReasonPhrase'    => $reasonPhrase,
+            'getHeaders'         => $headerArray,
+            'getBody'            => $body,
         );
         foreach($methods as $method => $value) {
             $this->method($response, $method, $value, array());
@@ -72,9 +171,14 @@ class OutputTest extends \PHPixie\Test\Testcase
         return $this->quickMock('\PHPixie\HTTP\Data\Headers');
     }
     
-    protected function getStream()
+    protected function getPsrStream()
     {
         return $this->quickMock('\Psr\Http\Message\StreamInterface');
+    }
+    
+    protected function getStream()
+    {
+        return $this->quickMock('\PHPixie\HTTP\Messages\Stream\Implementation');
     }
     
     protected function getContext()

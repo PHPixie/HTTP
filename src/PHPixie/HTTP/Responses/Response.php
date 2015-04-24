@@ -4,15 +4,19 @@ namespace PHPixie\HTTP\Responses;
 
 class Response
 {
+    protected $messages;
     protected $headers;
     protected $statusCode = 200;
     protected $reasonPhrase;
     protected $body;
     
-    public function __construct($headers, $body, $statusCode = 200, $reasonPhrase = null)
+    public function __construct($messages, $headers, $body, $statusCode = 200, $reasonPhrase = null)
     {
-        $this->headers = $headers;
-        $this->body    = $body;
+        $this->messages     = $messages;
+        $this->headers      = $headers;
+        $this->body         = $body;
+        $this->statusCode   = $statusCode;
+        $this->reasonPhrase = $reasonPhrase;
     }
     
     public function headers()
@@ -60,7 +64,7 @@ class Response
             return $headers;
         }
         
-        $cookieUpdates = $context->cookies->getUpdates();
+        $cookieUpdates = $context->cookies()->updates();
         if(empty($cookieUpdates)) {
             return $headers;
         }

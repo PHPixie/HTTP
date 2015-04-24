@@ -79,6 +79,15 @@ class Headers
         return $name;
     }
     
+    protected function normalizeValue($value)
+    {
+        if(!is_array($value)) {
+            return array($value);
+        }
+        
+        return $value;
+    }
+    
     protected function requireNames()
     {
         if($this->names === null) {

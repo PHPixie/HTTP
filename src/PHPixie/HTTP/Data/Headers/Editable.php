@@ -45,13 +45,4 @@ class Editable extends \PHPixie\HTTP\Data\Headers
         $this->headers[$name] = $value;
         $this->names[strtolower($name)] = $name;
     }
-    
-    protected function normalizeValue($value)
-    {
-        if(!is_array($value)) {
-            return array($value);
-        }
-        
-        return $value;
-    }
 }

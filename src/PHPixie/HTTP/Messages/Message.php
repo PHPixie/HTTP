@@ -31,7 +31,6 @@ abstract class Message implements MessageInterface
 
     public function getHeaders()
     {
-        $this->requireHeaders();
         return $this->headers;
     }
 

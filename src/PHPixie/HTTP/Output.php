@@ -4,37 +4,23 @@ namespace PHPixie\HTTP;
 
 class Output
 {
-    public function response($response, $context = null)
-    {
-        $this->outputStatusHeader(
-            $response->statusCode(),
-            $response->reasonPhrase()
-        );
-        
-        $this->headers($response->headers()->asArray());
-        if($context !== null) {
-            $this->outputCookies($context->cookies);
-        }
-        $this->outputStream($response->body());
-    }
-    
     public function responseMessage($response)
     {
-        $this->outputStatusHeader(
+        $this->statusHeader(
             $response->getStatusCode(),
             $response->getReasonPhrase(),
             $response->getProtocolVersion()
         );
         
         $this->headers($response->getHeaders());
-        $this->outputStream($response->getBody());
+        $this->body($response->getBody());
     }
     
     protected function headers($headers)
     {
         foreach($headers as $name => $lines) {
             foreach($lines as $key => $line) {
-                $this->header("$name: $line", $key === 0);
+                $this->header("$name: $line", false);
             }
         }
     }
@@ -44,36 +30,33 @@ class Output
         header($header, $replace);
     }
     
-    protected function outputCookies($cookies)
+    protected function output($header)
     {
-        foreach($cookies->getUpdates() as $update) {
-            setcookie(
-                $update->name(),
-                $update->value(),
-                $update->expires(),
-                $update->path(),
-                $update->domain(),
-                $update->secure(),
-                $update->httpOnly()
-            );
-        }
+        echo $header;
     }
     
-    protected function outputStream($stream)
+    protected function fpassthru($handle)
     {
-        if($body instanceof \PHPixie\HTTP\Messages\Stream\Implementation) {
-            fpassthru($body->detach());
+        fpassthru($handle);
+    }
+    
+    protected function body($stream)
+    {
+        if($stream instanceof \PHPixie\HTTP\Messages\Stream\Implementation) {
+            $stream->rewind();
+            $this->fpassthru($stream->resource());
             
         }else{
-            echo (string) $body;
+            $this->output((string) $stream);
         }
     }
     
-    protected function outputStatusHeader($statusCode, $reasonPhrase, $protocolVersion = '1.1')
+    protected function statusHeader($statusCode, $reasonPhrase, $protocolVersion = '1.1')
     {
         if($protocolVersion === null) {
             $protocolVersion = '1.1';
-            return "HTTP/{$protocolVersion} $statusCode $reasonPhrase";
         }
+        
+        $this->header("HTTP/{$protocolVersion} $statusCode $reasonPhrase");
     }
 }
