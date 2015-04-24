@@ -40,4 +40,46 @@ class Response
         $this->statusCode   = $code;
         $this->reasonPhrase = $reasonPhrase;
     }
+    
+    public function asResponseMessage($context = null)
+    {
+        return $this->messages->response(
+            '1.1',
+            $this->mergeContextHeaders($context),
+            $this->body,
+            $this->statusCode,
+            $this->reasonPhrase
+        );
+    }
+    
+    protected function mergeContextHeaders($context)
+    {
+        $headers = $this->headers->asArray();
+        
+        if($context === null ) {
+            return $headers;
+        }
+        
+        $cookieUpdates = $context->cookies->getUpdates();
+        if(empty($cookieUpdates)) {
+            return $headers;
+        }
+        
+        $cookieHeaders = array();
+        foreach($cookieUpdates as $update) {
+            $cookieHeaders[] = $update->asHeader();
+        }
+        
+        foreach($headers as $name => $value) {
+            if(strtolower($name) === 'set-cookie') {
+                foreach($cookieHeaders as $header) {
+                    $headers[$name][] = $header;
+                }
+                return $headers;
+            }
+        }
+        
+        $headers['Set-Cookie'] = $cookieHeaders;
+        return $headers;
+    }
 }

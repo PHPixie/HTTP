@@ -51,6 +51,29 @@ class UpdateTest extends \PHPixie\Test\Testcase
         $this->methodsTest();
     }
     
+    /**
+     * @covers ::asHeader
+     * @covers ::<protected>
+     */
+    public function testAsHeader()
+    {
+        $this->assertSame(
+            'pixie=Trixie; domain=fairies; path=/fairy; expires=Thu, 01-Jan-1970 00:00:05 UTC; secure; HttpOnly',
+            $this->update->asHeader()
+        );
+        
+        $this->update = new \PHPixie\HTTP\Context\Cookies\Update(
+            'Pixie Fairy',
+            'Stella Blum',
+            null,
+            null
+        );
+        $this->assertSame(
+            'Pixie+Fairy=Stella+Blum',
+            $this->update->asHeader()
+        );
+    }
+    
     protected function methodsTest()
     {
         $methods = array(

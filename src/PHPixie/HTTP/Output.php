@@ -2,21 +2,23 @@
 
 namespace PHPixie\HTTP;
 
-class Writer
+class Output
 {
-    public function a()
+    public function response($response, $context = null)
     {
         $this->outputStatusHeader(
             $response->statusCode(),
             $response->reasonPhrase()
         );
         
-        $this->outputHeaders($response->headers()->asArray());
-        $this->outputCookies($context->cookies);
+        $this->headers($response->headers()->asArray());
+        if($context !== null) {
+            $this->outputCookies($context->cookies);
+        }
         $this->outputStream($response->body());
     }
     
-    public function sapi($response)
+    public function responseMessage($response)
     {
         $this->outputStatusHeader(
             $response->getStatusCode(),
@@ -24,22 +26,22 @@ class Writer
             $response->getProtocolVersion()
         );
         
-        $this->outputHeaders($response->getHeaders());
+        $this->headers($response->getHeaders());
         $this->outputStream($response->getBody());
     }
     
-    protected function outputHeaders($headers)
+    protected function headers($headers)
     {
         foreach($headers as $name => $lines) {
             foreach($lines as $key => $line) {
-                $this->outputHeader("$name: $line", $key === 0);
+                $this->header("$name: $line", $key === 0);
             }
         }
     }
     
-    protected function outputHeader($header)
+    protected function header($header, $replace = true)
     {
-        header($header);
+        header($header, $replace);
     }
     
     protected function outputCookies($cookies)

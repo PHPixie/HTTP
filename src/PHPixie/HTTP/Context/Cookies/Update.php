@@ -57,4 +57,31 @@ class Update {
     {
         return $this->httpOnly;
     }
+    
+    public function asHeader()
+    {
+        $header = urlencode($this->name).'='.urlencode((string) $this->value);
+        
+        if($this->domain !== null) {
+            $header.= '; domain='.$this->domain;
+        }
+        
+        if($this->path !== null) {
+            $header.= '; path='.$this->path;
+        }
+        
+        if($this->expires !== null) {
+            $header.= '; expires=' . gmdate('D, d-M-Y H:i:s e', $this->expires);
+        }
+        
+        if($this->secure) {
+            $header.= '; secure';
+        }
+        
+        if($this->httpOnly) {
+            $header.= '; HttpOnly';
+        }
+        
+        return $header;
+    }
 }
