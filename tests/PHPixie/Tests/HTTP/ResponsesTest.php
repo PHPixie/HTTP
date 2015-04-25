@@ -150,8 +150,9 @@ class ResponsesTest extends \PHPixie\Test\Testcase
         
         $response = $responses->response($body);
         $this->assertInstance($response, '\PHPixie\HTTP\Responses\Response', array(
-            'headers' => $headers,
-            'body'    => $body
+            'messages' => $this->messages,
+            'headers'  => $headers,
+            'body'     => $body
         ));
     }
     

@@ -42,25 +42,50 @@ class OutputTest extends \PHPixie\Test\Testcase
     }
     
     /**
+     * @covers ::response
+     * @covers ::<protected>
+     */
+    public function testResponse()
+    {
+        $response = $this->quickMock('\PHPixie\HTTP\Responses\Response');
+        $context  = $this->quickMock('\PHPixie\HTTP\Context');
+        
+        $responseMessage = $this->prepareResponseMessage('1.0', 'string');
+        $this->method($response, 'asResponseMessage', $responseMessage, array($context), 0);
+        $this->output->response($response, $context);
+        
+        $responseMessage = $this->prepareResponseMessage('1.0', 'string');
+        $this->method($response, 'asResponseMessage', $responseMessage, array(), 0);
+        $this->output->response($response);
+    }
+    
+    /**
      * @runInSeparateProcess
      * @covers ::<protected>
      */
     public function testMethods()
     {
+        ob_start();
         $this->output = new \PHPixie\HTTP\Output();
         $this->methodsTest('string');
         $this->methodsTest('file');
+        ob_end_clean();
     }
     
     protected function responseMessageTest($protocolVersion, $bodyType)
+    {
+        $responseMessage = $this->prepareResponseMessage($protocolVersion, $bodyType);
+        $this->output->responseMessage($responseMessage);
+    }
+    
+    protected function prepareResponseMessage($protocolVersion, $bodyType)
     {
         $at = 0;
         $this->prepareStatusHeader(200, 'OK', $protocolVersion, $at);
         $headers = $this->prepareHeaders($at);
         $body = $this->prepareBody($bodyType, $at);
         
-        $responseMessage = $this->responseMessage($protocolVersion, 200, 'OK', $headers, $body);
-        $this->output->responseMessage($responseMessage);
+        return $this->responseMessage($protocolVersion, 200, 'OK', $headers, $body);   
     }
     
     protected function methodsTest($bodyType)

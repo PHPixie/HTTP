@@ -1,11 +1,11 @@
 <?php
 
-namespace PHPixie\Tests\HTTP\Headers;
+namespace PHPixie\Tests\HTTP\Data\Headers;
 
 /**
- * @coversDefaultClass PHPixie\HTTP\Headers\Editable
+ * @coversDefaultClass PHPixie\HTTP\Data\Headers\Editable
  */
-class EditableTest extends \PHPixie\Tests\HTTP\HeadersTest
+class EditableTest extends \PHPixie\Tests\HTTP\Data\HeadersTest
 {
     /**
      * @covers ::set
@@ -69,6 +69,6 @@ class EditableTest extends \PHPixie\Tests\HTTP\HeadersTest
     
     protected function headers()
     {
-        return new \PHPixie\HTTP\Headers\Editable($this->headerArray);
+        return new \PHPixie\HTTP\Data\Headers\Editable($this->headerArray);
     }
 }

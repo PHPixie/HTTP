@@ -10,7 +10,7 @@ class Request
         'query'      => 'getQueryParams',
         'data'       => 'getParsedBody',
         'attributes' => 'getAttributes',
-        'uploads'    => 'getFileUploads',
+        'uploads'    => 'getUploadedFiles',
     );
     
     protected $server;

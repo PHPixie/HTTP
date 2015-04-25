@@ -37,6 +37,7 @@ class RequestTest extends \PHPixie\Test\Testcase
      * @covers ::query
      * @covers ::data
      * @covers ::attributes
+     * @covers ::uploads
      * @covers ::<protected>
      */
     public function testData()
@@ -45,10 +46,10 @@ class RequestTest extends \PHPixie\Test\Testcase
             'query'      => 'getQueryParams',
             'data'       => 'getParsedBody',
             'attributes' => 'getAttributes',
-            'uploads'    => 'getFileUploads',
+            'uploads'    => 'getUploadedFiles',
         );
         
-        foreach($this->dataMethods as $method => $serverMethod) {
+        foreach($dataMethods as $method => $serverMethod) {
             $data = $this->abstractMock('\PHPixie\Slice\Data');
             $this->prepareData($serverMethod, 'data', $data);
             for($i=0; $i<2; $i++) {

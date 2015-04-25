@@ -1,9 +1,9 @@
 <?php
 
-namespace PHPixie\Tests\HTTP;
+namespace PHPixie\Tests\HTTP\Data;
 
 /**
- * @coversDefaultClass PHPixie\HTTP\Headers
+ * @coversDefaultClass PHPixie\HTTP\Data\Headers
  */
 class HeadersTest extends \PHPixie\Test\Testcase
 {
@@ -52,8 +52,8 @@ class HeadersTest extends \PHPixie\Test\Testcase
      */
     public function testGetRequired()
     {
-        $this->assertSame('Pixie', $this->headers->get('fairy'));
-        $this->assertSame('Trixie,Blum', $this->headers->get('pixie-name'));
+        $this->assertSame('Pixie', $this->headers->getRequired('fairy'));
+        $this->assertSame('Trixie,Blum', $this->headers->getRequired('pixie-name'));
         
         $headers = $this->headers;
         $this->assertException(function() use($headers) {
@@ -105,6 +105,6 @@ class HeadersTest extends \PHPixie\Test\Testcase
     
     protected function headers()
     {
-        return new \PHPixie\HTTP\Headers($this->headerArray);
+        return new \PHPixie\HTTP\Data\Headers($this->headerArray);
     }
 }

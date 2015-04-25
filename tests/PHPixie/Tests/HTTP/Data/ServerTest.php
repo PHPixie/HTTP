@@ -1,9 +1,9 @@
 <?php
 
-namespace PHPixie\Tests\HTTP;
+namespace PHPixie\Tests\HTTP\Data;
 
 /**
- * @coversDefaultClass PHPixie\HTTP\Server
+ * @coversDefaultClass PHPixie\HTTP\Data\Server
  */
 class ServerTest extends \PHPixie\Test\Testcase
 {
@@ -16,7 +16,7 @@ class ServerTest extends \PHPixie\Test\Testcase
     
     public function setUp()
     {
-        $this->server = new \PHPixie\HTTP\Server($this->serverArray);
+        $this->server = new \PHPixie\HTTP\Data\Server($this->serverArray);
     }
     
     /**

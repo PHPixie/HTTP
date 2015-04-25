@@ -4,16 +4,22 @@ namespace PHPixie\HTTP;
 
 class Output
 {
-    public function responseMessage($response)
+    public function response($response, $context = null)
+    {
+        $responseMessage = $response->asResponseMessage($context);
+        $this->responseMessage($responseMessage);
+    }
+    
+    public function responseMessage($responseMessage)
     {
         $this->statusHeader(
-            $response->getStatusCode(),
-            $response->getReasonPhrase(),
-            $response->getProtocolVersion()
+            $responseMessage->getStatusCode(),
+            $responseMessage->getReasonPhrase(),
+            $responseMessage->getProtocolVersion()
         );
         
-        $this->headers($response->getHeaders());
-        $this->body($response->getBody());
+        $this->headers($responseMessage->getHeaders());
+        $this->body($responseMessage->getBody());
     }
     
     protected function headers($headers)

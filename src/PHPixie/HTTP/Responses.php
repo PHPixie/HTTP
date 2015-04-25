@@ -83,6 +83,7 @@ class Responses
     
     protected function buildResponse($headers, $body, $statusCode = 200, $reasonPhrase = null)
     {
-        return new Responses\Response($headers, $body, $statusCode, $reasonPhrase);
+        $messages = $this->builder->messages();
+        return new Responses\Response($messages, $headers, $body, $statusCode, $reasonPhrase);
     }
 }
