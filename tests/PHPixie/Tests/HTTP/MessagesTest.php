@@ -149,7 +149,7 @@ class MessagesTest extends \PHPixie\Test\Testcase
         $stream = $this->messages->stringStream('test');
         $this->assertInstance(
             $stream,
-            '\PHPixie\HTTP\Messages\Stream\String',
+            '\PHPixie\HTTP\Messages\Stream\StringStream',
             array(
                 'string' => 'test'
             )
@@ -158,7 +158,7 @@ class MessagesTest extends \PHPixie\Test\Testcase
         $stream = $this->messages->stringStream();
         $this->assertInstance(
             $stream,
-            '\PHPixie\HTTP\Messages\Stream\String',
+            '\PHPixie\HTTP\Messages\Stream\StringStream',
             array(
                 'string' => ''
             )

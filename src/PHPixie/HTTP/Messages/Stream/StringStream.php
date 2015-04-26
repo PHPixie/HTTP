@@ -5,7 +5,7 @@ namespace PHPixie\HTTP\Messages\Stream;
 use Psr\Http\Message\StreamInterface;
 use RuntimeException;
 
-class String implements StreamInterface
+class StringStream implements StreamInterface
 {
     protected $string;
     

@@ -104,16 +104,15 @@ class ImplementationTest extends \PHPixie\Tests\HTTP\Messages\UploadedFileTest
      */
     public function testInvalidFileSize()
     {
-        $this->file = 'not_existing';
-        $uploadedFile = $this->uploadedFile();
-        
         $methods = array(
-            'getClientMediaType',
-            'getSize'
+            'getClientMediaType' => 'getFileType',
+            'getSize'            => 'getFileSize'
         );
         
-        foreach($methods as $method) {
-            $this->assertException(function() use($uploadedFile) {
+        $uploadedFile = $this->uploadedFile;
+        foreach($methods as $method => $failMethod) {
+            $this->method($this->uploadedFile, $failMethod, false, array(), 0);
+            $this->assertException(function() use($uploadedFile, $method) {
                 $uploadedFile->$method();
             }, '\RuntimeException');
         }

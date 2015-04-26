@@ -186,7 +186,7 @@ class ResponsesTest extends \PHPixie\Test\Testcase
     
     protected function getStringStream()
     {
-        return $this->quickMock('\PHPixie\HTTP\Messages\Stream\String');
+        return $this->quickMock('\PHPixie\HTTP\Messages\Stream\StringStream');
     }
     
     protected function getStream()

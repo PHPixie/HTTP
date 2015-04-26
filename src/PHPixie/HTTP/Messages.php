@@ -91,7 +91,7 @@ class Messages
     
     public function stringStream($string = '')
     {
-        return new Messages\Stream\String($string);
+        return new Messages\Stream\StringStream($string);
     }
     
     public function uri($uri)

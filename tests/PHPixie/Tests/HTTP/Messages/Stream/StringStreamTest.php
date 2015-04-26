@@ -3,15 +3,15 @@
 namespace PHPixie\Tests\HTTP\Messages\Stream;
 
 /**
- * @coversDefaultClass PHPixie\HTTP\Messages\Stream\String
+ * @coversDefaultClass PHPixie\HTTP\Messages\Stream\StringStream
  */
-class StringTest extends \PHPixie\Tests\HTTP\Messages\StreamTest
+class StringStreamTest extends \PHPixie\Tests\HTTP\Messages\StreamTest
 {
     protected $string = 'pixie';
     
     public function setUp()
     {
-        $this->stream = new \PHPixie\HTTP\Messages\Stream\String($this->string);
+        $this->stream = new \PHPixie\HTTP\Messages\Stream\StringStream($this->string);
     }
     
     /**
@@ -20,7 +20,7 @@ class StringTest extends \PHPixie\Tests\HTTP\Messages\StreamTest
      */
     public function testConstruct()
     {
-        $stream = new \PHPixie\HTTP\Messages\Stream\String();
+        $stream = new \PHPixie\HTTP\Messages\Stream\StringStream();
         $this->assertSame('', (string) $stream);
     }
     
