@@ -93,6 +93,27 @@ class RequestTest extends \PHPixie\Test\Testcase
         $this->assertSame($this->serverRequest, $this->request->serverRequest());
     }
     
+    /**
+     * @covers ::method
+     * @covers ::<protected>
+     */
+    public function testMethod()
+    {
+        $this->method($this->serverRequest, 'getMethod', 'GET', array(), 0);
+        $this->assertSame('GET', $this->request->method());
+    }
+    
+    /**
+     * @covers ::uri
+     * @covers ::<protected>
+     */
+    public function testUri()
+    {
+        $uri = $this->quickMock('\Psr\Http\Message\UriInterface');
+        $this->method($this->serverRequest, 'getUri', $uri, array(), 0);
+        $this->assertSame($uri, $this->request->uri());
+    }
+
     protected function prepareData($serverRequestMethod, $builderMethod, $instance)
     {
         $array = array('test' => 1);

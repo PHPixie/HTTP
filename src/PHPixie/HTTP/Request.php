@@ -67,6 +67,16 @@ class Request
         return $this->serverRequest;
     }
     
+    public function method()
+    {
+        return $this->serverRequest->getMethod();
+    }
+    
+    public function uri()
+    {
+        return $this->serverRequest->getUri();
+    }
+    
     protected function getData($type)
     {
         if(!array_key_exists($type, $this->dataMap)) {
