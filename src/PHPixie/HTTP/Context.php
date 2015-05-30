@@ -7,10 +7,16 @@ class Context
     protected $cookies;
     protected $session;
     
-    public function __construct($cookies, $session)
+    public function __construct($serverRequest, $cookies, $session)
     {
-        $this->cookies = $cookies;
-        $this->session = $session;
+        $this->serverRequest = $serverRequest;
+        $this->cookies       = $cookies;
+        $this->session       = $session;
+    }
+    
+    public function serverRequest()
+    {
+        return $this->serverRequest;
     }
     
     public function cookies()
