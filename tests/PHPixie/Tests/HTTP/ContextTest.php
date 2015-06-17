@@ -7,6 +7,7 @@ namespace PHPixie\Tests\HTTP;
  */
 class ContextTest extends \PHPixie\Test\Testcase
 {
+    protected $serverRequest;
     protected $cookies;
     protected $server;
     
@@ -14,10 +15,12 @@ class ContextTest extends \PHPixie\Test\Testcase
     
     public function setUp()
     {
-        $this->cookies = $this->quickMock('\PHPixie\HTTP\Context\Cookies');
-        $this->session = $this->quickMock('\PHPixie\HTTP\Context\Session');
+        $this->serverRequest = $this->quickMock('\Psr\Http\Message\ServerRequestInterface');
+        $this->cookies       = $this->quickMock('\PHPixie\HTTP\Context\Cookies');
+        $this->session       = $this->quickMock('\PHPixie\HTTP\Context\Session');
         
         $this->context = new \PHPixie\HTTP\Context(
+            $this->serverRequest,
             $this->cookies,
             $this->session
         );
@@ -30,6 +33,15 @@ class ContextTest extends \PHPixie\Test\Testcase
     public function testConstruct()
     {
         
+    }
+    
+    /**
+     * @covers ::serverRequest
+     * @covers ::<protected>
+     */
+    public function testServerRequest()
+    {
+        $this->assertSame($this->serverRequest, $this->context->serverRequest());
     }
     
     /**

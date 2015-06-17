@@ -51,9 +51,9 @@ class Builder
         return new Data\Server($serverData);
     }
     
-    public function context($cookies, $session)
+    public function context($serverRequest, $cookies, $session)
     {
-        return new Context($cookies, $session);
+        return new Context($serverRequest, $cookies, $session);
     }
     
     public function cookies($cookieArray = array())
@@ -85,6 +85,11 @@ class Builder
             $secure,
             $httpOnly
         );    
+    }
+    
+    public function contextContainer($context)
+    {
+        return new Context\Container\Implementation($context);
     }
     
     protected function instance($name)

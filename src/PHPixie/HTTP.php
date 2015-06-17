@@ -48,7 +48,12 @@ class HTTP
             $session = $this->builder->sapiSession();
         }
         
-        return $this->builder->context($cookies, $session);
+        return $this->builder->context($serverRequest, $cookies, $session);
+    }
+    
+    public function contextContainer($context)
+    {
+        return $this->builder->contextContainer($context);
     }
     
     public function messages()

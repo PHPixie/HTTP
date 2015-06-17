@@ -2,12 +2,17 @@
 
 namespace PHPixie\HTTP\Context\Container;
 
-interface Implementation
+class Implementation
 {
-    protected $builder;
+    protected $context;
+    
+    public function __construct($context)
+    {
+        $this->context = $context;
+    }
     
     public function httpContext()
     {
-        $this->builder->
+        return $this->context;
     }
 }

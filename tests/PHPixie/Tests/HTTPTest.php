@@ -204,9 +204,22 @@ class HTTPTest extends \PHPixie\Test\Testcase
         }
         
         $context = $this->getContext();
-        $this->method($this->builder, 'context', $context, array($cookies, $session), $at++);
+        $this->method($this->builder, 'context', $context, array($serverRequest, $cookies, $session), $at++);
         
         return $context;
+    }
+    
+    /**
+     * @covers ::contextContainer
+     * @covers ::<protected>
+     */
+    public function testContextContainer()
+    {
+        $context   = $this->quickMock('\PHPixie\HTTP\Context');
+        $container = $this->quickMock('\PHPixie\HTTP\Context\Container\Implementation');
+        
+        $this->method($this->builder, 'contextContainer', $container, array($context), 0);
+        $this->assertSame($container, $this->http->contextContainer($context));
     }
     
     protected function prepareBuilderMethod($name, $at = 0)

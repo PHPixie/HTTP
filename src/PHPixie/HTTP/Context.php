@@ -4,6 +4,7 @@ namespace PHPixie\HTTP;
 
 class Context
 {
+    protected $serverRequest;
     protected $cookies;
     protected $session;
     

@@ -146,13 +146,15 @@ class BuilderTest extends \PHPixie\Test\Testcase
      */
     public function testContext()
     {
-        $cookies = $this->quickMock('\PHPixie\HTTP\Context\Cookies');
-        $session = $this->quickMock('\PHPixie\HTTP\Context\Session');
+        $serverRequest = $this->quickMock('\Psr\Http\Message\ServerRequestInterface');
+        $cookies       = $this->quickMock('\PHPixie\HTTP\Context\Cookies');
+        $session       = $this->quickMock('\PHPixie\HTTP\Context\Session');
         
-        $context = $this->builder->context($cookies, $session);
+        $context = $this->builder->context($serverRequest, $cookies, $session);
         $this->assertInstance($context, '\PHPixie\HTTP\Context', array(
-            'cookies' => $cookies,
-            'session' => $session,
+            'serverRequest' => $serverRequest,
+            'cookies'       => $cookies,
+            'session'       => $session,
         ));
     }
     
@@ -217,6 +219,20 @@ class BuilderTest extends \PHPixie\Test\Testcase
         
         $cookieUpdate = $this->builder->cookiesUpdate('pixie', 'Trixie');
         $this->assertInstance($cookieUpdate, '\PHPixie\HTTP\Context\Cookies\Update', $params);
+    }
+    
+    /**
+     * @covers ::contextContainer
+     * @covers ::<protected>
+     */
+    public function testContextContainer()
+    {
+        $context = $this->quickMock('\PHPixie\HTTP\Context');
+        
+        $contextContainer = $this->builder->contextContainer($context);
+        $this->assertInstance($contextContainer, '\PHPixie\HTTP\Context\Container\Implementation', array(
+            'context' => $context
+        ));
     }
     
     protected function instanceTest($method, $class, $propertyMap = array())
