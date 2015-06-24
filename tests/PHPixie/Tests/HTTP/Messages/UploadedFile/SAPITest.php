@@ -9,7 +9,7 @@ class SAPITest extends \PHPixie\Tests\HTTP\Messages\UploadedFileTest
 {
     
     /**
-     * @covers ::move
+     * @covers ::moveTo
      * @covers ::<protected>
      */
     public function testMove()
@@ -17,13 +17,13 @@ class SAPITest extends \PHPixie\Tests\HTTP\Messages\UploadedFileTest
         $destination = 'dest.png';
         
         $this->method($this->uploadedFile, 'moveUploadedFile', true, array($destination), 0);
-        $this->uploadedFile->move($destination);
+        $this->uploadedFile->moveTo($destination);
         
         $this->method($this->uploadedFile, 'moveUploadedFile', false, array($destination), 0);
         
         $uploadedFile = $this->uploadedFile;
         $this->assertException(function() use($uploadedFile, $destination) {
-            $uploadedFile->move($destination);
+            $uploadedFile->moveTo($destination);
         }, '\RuntimeException');
     }
     
@@ -39,7 +39,7 @@ class SAPITest extends \PHPixie\Tests\HTTP\Messages\UploadedFileTest
         );
         
         $this->assertException(function() use($uploadedFile) {
-            $uploadedFile->move('test');
+            $uploadedFile->moveTo('test');
         }, '\RuntimeException');
     }
         

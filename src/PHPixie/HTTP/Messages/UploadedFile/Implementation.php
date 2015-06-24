@@ -59,7 +59,7 @@ class Implementation extends \PHPixie\HTTP\Messages\UploadedFile
         return $this->size;
     }
     
-    public function move($path)
+    public function moveTo($path)
     {
         $this->assertValidUpload();
         if(!$this->moveFile($path)) {

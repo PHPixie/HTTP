@@ -80,7 +80,7 @@ class ImplementationTest extends \PHPixie\Tests\HTTP\Messages\UploadedFileTest
     }
     
     /**
-     * @covers ::move
+     * @covers ::moveTo
      * @covers ::<protected>
      */
     public function testMove()
@@ -88,13 +88,13 @@ class ImplementationTest extends \PHPixie\Tests\HTTP\Messages\UploadedFileTest
         $destination = 'dest.png';
         
         $this->method($this->uploadedFile, 'moveFile', true, array($destination), 0);
-        $this->uploadedFile->move($destination);
+        $this->uploadedFile->moveTo($destination);
         
         $this->method($this->uploadedFile, 'moveFile', false, array($destination), 0);
         
         $uploadedFile = $this->uploadedFile;
         $this->assertException(function() use($uploadedFile, $destination) {
-            $uploadedFile->move($destination);
+            $uploadedFile->moveTo($destination);
         }, '\RuntimeException');
     }
     
@@ -119,7 +119,7 @@ class ImplementationTest extends \PHPixie\Tests\HTTP\Messages\UploadedFileTest
     }
     
     /**
-     * @covers ::move
+     * @covers ::moveTo
      * @covers ::<protected>
      */
     public function testMoveFile()
@@ -132,7 +132,7 @@ class ImplementationTest extends \PHPixie\Tests\HTTP\Messages\UploadedFileTest
         );
         
         $destination = tempnam($this->tempDir, 'uploaded_file_dest.php');
-        $uploadedFile->move($destination);
+        $uploadedFile->moveTo($destination);
         
         $this->assertSame(false, file_exists($this->file));
         $this->assertSame(true, file_exists($destination));

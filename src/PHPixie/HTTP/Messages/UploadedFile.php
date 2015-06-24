@@ -59,5 +59,5 @@ abstract class UploadedFile implements UploadedFileInterface
         }
     }
     
-    abstract public function move($path);
+    abstract public function moveTo($path);
 }

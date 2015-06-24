@@ -61,7 +61,7 @@ abstract class UploadedFileTest extends \PHPixie\Test\Testcase
     
     /**
      * @covers ::getStream
-     * @covers ::move
+     * @covers ::moveTo
      * @covers ::<protected>
      */
     public function testInvalidUpload()
@@ -73,7 +73,7 @@ abstract class UploadedFileTest extends \PHPixie\Test\Testcase
         }, '\RuntimeException');
         
         $this->assertException(function() use($uploadedFile) {
-            $uploadedFile->move('test');
+            $uploadedFile->moveTo('test');
         }, '\RuntimeException');
     }
     

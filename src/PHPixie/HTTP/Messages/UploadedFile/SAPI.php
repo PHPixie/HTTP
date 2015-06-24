@@ -17,7 +17,7 @@ class SAPI extends \PHPixie\HTTP\Messages\UploadedFile
         $this->size            = $fileData['size'];
     }
     
-    public function move($path)
+    public function moveTo($path)
     {
         $this->assertValidUpload();
         if(!$this->moveUploadedFile($path)) {
