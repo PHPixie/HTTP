@@ -2,7 +2,7 @@
 
 namespace PHPixie\HTTP\Context\Container;
 
-class Implementation
+class Implementation implements \PHPixie\HTTP\Context\Container
 {
     protected $context;
     
