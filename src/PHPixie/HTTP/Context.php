@@ -4,20 +4,20 @@ namespace PHPixie\HTTP;
 
 class Context
 {
-    protected $serverRequest;
+    protected $request;
     protected $cookies;
     protected $session;
     
-    public function __construct($serverRequest, $cookies, $session)
+    public function __construct($request, $cookies, $session)
     {
-        $this->serverRequest = $serverRequest;
-        $this->cookies       = $cookies;
-        $this->session       = $session;
+        $this->request = $request;
+        $this->cookies = $cookies;
+        $this->session = $session;
     }
     
-    public function serverRequest()
+    public function request()
     {
-        return $this->serverRequest;
+        return $this->request;
     }
     
     public function cookies()

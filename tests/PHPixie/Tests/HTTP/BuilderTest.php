@@ -146,15 +146,15 @@ class BuilderTest extends \PHPixie\Test\Testcase
      */
     public function testContext()
     {
-        $serverRequest = $this->quickMock('\Psr\Http\Message\ServerRequestInterface');
-        $cookies       = $this->quickMock('\PHPixie\HTTP\Context\Cookies');
-        $session       = $this->quickMock('\PHPixie\HTTP\Context\Session');
+        $request = $this->quickMock('\PHPixie\HTTP\Request');
+        $cookies = $this->quickMock('\PHPixie\HTTP\Context\Cookies');
+        $session = $this->quickMock('\PHPixie\HTTP\Context\Session');
         
-        $context = $this->builder->context($serverRequest, $cookies, $session);
+        $context = $this->builder->context($request, $cookies, $session);
         $this->assertInstance($context, '\PHPixie\HTTP\Context', array(
-            'serverRequest' => $serverRequest,
-            'cookies'       => $cookies,
-            'session'       => $session,
+            'request' => $request,
+            'cookies' => $cookies,
+            'session' => $session,
         ));
     }
     

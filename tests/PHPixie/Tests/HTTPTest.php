@@ -144,24 +144,6 @@ class HTTPTest extends \PHPixie\Test\Testcase
     }
     
     /**
-     * @covers ::serverRequestContext
-     * @covers ::<protected>
-     */
-    public function testServerRequestContext()
-    {
-        $serverRequest = $this->getServerRequest();
-        $session = $this->getSession();
-        
-        $context = $this->prepareServerRequestContext($serverRequest, $session);
-        
-        $this->assertSame($context, $this->http->serverRequestContext($serverRequest, $session));
-        
-        $context = $this->prepareServerRequestContext($serverRequest);
-        
-        $this->assertSame($context, $this->http->serverRequestContext($serverRequest));  
-    }
-    
-    /**
      * @covers ::context
      * @covers ::<protected>
      */
@@ -170,13 +152,10 @@ class HTTPTest extends \PHPixie\Test\Testcase
         $request = $this->getRequest();
         $session = $this->getSession();
         
-        $serverRequest = $this->getServerRequest();
-        $this->method($request, 'serverRequest', $serverRequest, array());
-        
-        $context = $this->prepareServerRequestContext($serverRequest, $session);
+        $context = $this->prepareContext($request, $session);
         $this->assertSame($context, $this->http->context($request, $session));
         
-        $context = $this->prepareServerRequestContext($serverRequest);
+        $context = $this->prepareContext($request);
         $this->assertSame($context, $this->http->context($request));
     }
     
@@ -188,8 +167,14 @@ class HTTPTest extends \PHPixie\Test\Testcase
         return $serverRequest;
     }
     
-    protected function prepareServerRequestContext($serverRequest, $session = null)
+    protected function prepareContext($request, $session = null, $serverRequest = null)
     {
+        if($serverRequest === null) {
+            $serverRequest = $this->getServerRequest();
+        }
+        
+        $this->method($request, 'serverRequest', $serverRequest, array(), 0);
+        
         $cookieArray = array('a' => 1);
         $this->method($serverRequest, 'getCookieParams', $cookieArray, array(), 0);
         
@@ -204,7 +189,7 @@ class HTTPTest extends \PHPixie\Test\Testcase
         }
         
         $context = $this->getContext();
-        $this->method($this->builder, 'context', $context, array($serverRequest, $cookies, $session), $at++);
+        $this->method($this->builder, 'context', $context, array($request, $cookies, $session), $at++);
         
         return $context;
     }

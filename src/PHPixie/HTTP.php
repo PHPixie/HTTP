@@ -37,18 +37,13 @@ class HTTP
     public function context($request, $session = null)
     {
         $serverRequest = $request->serverRequest();
-        return $this->serverRequestContext($serverRequest, $session);
-    }
-    
-    public function serverRequestContext($serverRequest, $session = null)
-    {
         $cookieArray = $serverRequest->getCookieParams();
         $cookies = $this->builder->cookies($cookieArray);
         if($session === null) {
             $session = $this->builder->sapiSession();
         }
         
-        return $this->builder->context($serverRequest, $cookies, $session);
+        return $this->builder->context($request, $cookies, $session);
     }
     
     public function contextContainer($context)

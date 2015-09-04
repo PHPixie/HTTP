@@ -51,9 +51,9 @@ class Builder
         return new Data\Server($serverData);
     }
     
-    public function context($serverRequest, $cookies, $session)
+    public function context($request, $cookies, $session)
     {
-        return new Context($serverRequest, $cookies, $session);
+        return new Context($request, $cookies, $session);
     }
     
     public function cookies($cookieArray = array())
