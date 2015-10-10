@@ -13,11 +13,11 @@
         }
     ],
     "require": {
-        "phpixie/slice": "3.*@dev",
-        "psr/http-message": "1.0.*@dev"
+        "phpixie/slice": "~3.0",
+        "psr/http-message": "~1.0"
     },
     "require-dev": {
-        "phpixie/test": "3.*@dev"
+        "phpixie/test": "~3.0"
     },
     "autoload": {
         "psr-4": {
