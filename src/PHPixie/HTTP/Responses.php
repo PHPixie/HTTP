@@ -10,12 +10,21 @@ class Responses
     {
         $this->builder = $builder;   
     }
-    
+
+    /**
+     * @param $string
+     * @return Responses\Response
+     */
     public function string($string)
     {
         return $this->stringResponse($string);
     }
-    
+
+    /**
+     * @param     $url
+     * @param int $statusCode
+     * @return Responses\Response
+     */
     public function redirect($url, $statusCode = 302)
     {
         return $this->stringResponse(
@@ -26,7 +35,11 @@ class Responses
             $statusCode
         );
     }
-    
+
+    /**
+     * @param $data
+     * @return Responses\Response
+     */
     public function json($data)
     {
         $string = json_encode($data);
@@ -41,24 +54,47 @@ class Responses
         );
     }
 
+    /**
+     * @param $file
+     * @return Responses\Response
+     */
     public function streamFile($file)
     {
         $body = $this->builder->messages()->stream($file);
         return $this->response($body);
     }
-    
+
+    /**
+     * @param $fileName
+     * @param $contentType
+     * @param $contents
+     * @return Responses\Response
+     */
     public function download($fileName, $contentType, $contents)
     {
         $body = $this->builder->messages()->stringStream($contents);
         return $this->downloadResponse($fileName, $contentType, $body);
     }
-    
+
+    /**
+     * @param $fileName
+     * @param $contentType
+     * @param $file
+     * @return Responses\Response
+     */
     public function downloadFile($fileName, $contentType, $file)
     {
         $body = $this->builder->messages()->stream($file);
         return $this->downloadResponse($fileName, $contentType, $body);
     }
-    
+
+    /**
+     * @param       $body
+     * @param array $headerArray
+     * @param int   $statusCode
+     * @param null  $reasonPhrase
+     * @return Responses\Response
+     */
     public function response($body, $headerArray = array(), $statusCode = 200, $reasonPhrase = null)
     {
         $headers = $this->builder->editableHeaders($headerArray);
