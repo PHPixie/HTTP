@@ -4,12 +4,19 @@ namespace PHPixie\HTTP;
 
 class Output
 {
+    /**
+     * @param Responses\Response $response
+     * @param Context            $context
+     */
     public function response($response, $context = null)
     {
         $responseMessage = $response->asResponseMessage($context);
         $this->responseMessage($responseMessage);
     }
-    
+
+    /**
+     * @param $responseMessage
+     */
     public function responseMessage($responseMessage)
     {
         $this->statusHeader(
@@ -21,7 +28,7 @@ class Output
         $this->headers($responseMessage->getHeaders());
         $this->body($responseMessage->getBody());
     }
-    
+
     protected function headers($headers)
     {
         foreach($headers as $name => $lines) {

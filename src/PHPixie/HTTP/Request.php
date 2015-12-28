@@ -12,36 +12,50 @@ class Request
         'attributes' => 'getAttributes',
         'uploads'    => 'getUploadedFiles',
     );
-    
     protected $server;
     protected $headers;
-    
+
     public function __construct($builder, $serverRequest)
     {
         $this->builder       = $builder;
         $this->serverRequest = $serverRequest;
     }
-    
+
+    /**
+     * @return \PHPixie\Slice\Type\ArrayData
+     */
     public function query()
     {
         return $this->getData('query');
     }
-    
+
+    /**
+     * @return \PHPixie\Slice\Type\ArrayData
+     */
     public function data()
     {
         return $this->getData('data');
     }
-    
+
+    /**
+     * @return \PHPixie\Slice\Type\ArrayData
+     */
     public function attributes()
     {
         return $this->getData('attributes');
     }
-    
+
+    /**
+     * @return \PHPixie\Slice\Type\ArrayData
+     */
     public function uploads()
     {
         return $this->getData('uploads');
     }
-    
+
+    /**
+     * @return \PHPixie\HTTP\Data\Server
+     */
     public function server()
     {
         if($this->server === null) {
@@ -51,7 +65,10 @@ class Request
         
         return $this->server;
     }
-    
+
+    /**
+     * @return \PHPixie\HTTP\Data\Headers
+     */
     public function headers()
     {
         if($this->headers === null) {
@@ -61,22 +78,31 @@ class Request
         
         return $this->headers;
     }
-    
+
+    /**
+     * @return \PHPixie\HTTP\Messages\Message\Request\ServerRequest\SAPI
+     */
     public function serverRequest()
     {
         return $this->serverRequest;
     }
-    
+
+    /**
+     * @return string
+     */
     public function method()
     {
         return $this->serverRequest->getMethod();
     }
-    
+
+    /**
+     * @return \PHPixie\HTTP\Messages\URI\SAPI
+     */
     public function uri()
     {
         return $this->serverRequest->getUri();
     }
-    
+
     protected function getData($type)
     {
         if(!array_key_exists($type, $this->dataMap)) {
