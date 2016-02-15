@@ -2,14 +2,50 @@
 
 namespace PHPixie\HTTP\Responses;
 
+use PHPixie\HTTP\Context;
+use PHPixie\HTTP\Data\Headers;
+use PHPixie\HTTP\Messages;
+use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\StreamInterface;
+
+/**
+ * HTTP response representation
+ */
 class Response
 {
+    /**
+     * @var Messages
+     */
     protected $messages;
+
+    /**
+     * @var Headers
+     */
     protected $headers;
+
+    /**
+     * @var int
+     */
     protected $statusCode = 200;
+
+    /**
+     * @var string
+     */
     protected $reasonPhrase;
+
+    /**
+     * @var StreamInterface
+     */
     protected $body;
-    
+
+    /**
+     * Constructor
+     * @param Messages $messages
+     * @param Headers $headers
+     * @param StreamInterface $body
+     * @param int $statusCode
+     * @param string $reasonPhrase
+     */
     public function __construct($messages, $headers, $body, $statusCode = 200, $reasonPhrase = null)
     {
         $this->messages     = $messages;
@@ -18,33 +54,59 @@ class Response
         $this->statusCode   = $statusCode;
         $this->reasonPhrase = $reasonPhrase;
     }
-    
+
+    /**
+     * Headers
+     * @return Headers
+     */
     public function headers()
     {
         return $this->headers;
     }
-    
+
+    /**
+     * Body stream
+     * @return StreamInterface
+     */
     public function body()
     {
         return $this->body;
     }
-    
+
+    /**
+     * Status code
+     * @return int
+     */
     public function statusCode()
     {
         return $this->statusCode;
     }
-    
+
+    /**
+     * Status phrase
+     * @return string|null
+     */
     public function reasonPhrase()
     {
         return $this->reasonPhrase;
     }
-    
+
+    /**
+     * Set status code and phrase
+     * @param int $code
+     * @param string|null $reasonPhrase
+     */
     public function setStatus($code, $reasonPhrase = null)
     {
         $this->statusCode   = $code;
         $this->reasonPhrase = $reasonPhrase;
     }
-    
+
+    /**
+     * Get PSR-7 response representation
+     * @param Context|null $context HTTP context
+     * @return ResponseInterface
+     */
     public function asResponseMessage($context = null)
     {
         return $this->messages->response(
@@ -55,7 +117,12 @@ class Response
             $this->reasonPhrase
         );
     }
-    
+
+    /**
+     * Merge headers from HTTP context
+     * @param Context $context
+     * @return array
+     */
     protected function mergeContextHeaders($context)
     {
         $headers = $this->headers->asArray();

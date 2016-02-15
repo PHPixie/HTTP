@@ -3,11 +3,16 @@ namespace PHPixie\HTTP\Messages\Message;
 
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\UriInterface;
-use InvalidArgumentException;
 
-class Request extends    \PHPixie\HTTP\Messages\Message
-              implements RequestInterface
+/**
+ * Base PSR-7 Request Implementation
+ */
+abstract class Request extends    \PHPixie\HTTP\Messages\Message
+                       implements RequestInterface
 {
+    /**
+     * @var array
+     */
     protected static $validMethods = array(
         'CONNECT',
         'DELETE',
@@ -19,11 +24,25 @@ class Request extends    \PHPixie\HTTP\Messages\Message
         'PUT',
         'TRACE',
     );
-    
+
+    /**
+     * @var string
+     */
     protected $requestTarget;
+
+    /**
+     * @var string
+     */
     protected $method;
+
+    /**
+     * @var UriInterface
+     */
     protected $uri;
-    
+
+    /**
+     * @inheritdoc
+     */
     public function getRequestTarget()
     {
         if ($this->requestTarget !== null) {
@@ -48,11 +67,14 @@ class Request extends    \PHPixie\HTTP\Messages\Message
         
         return $this->requestTarget;
     }
-    
+
+    /**
+     * @inheritdoc
+     */
     public function withRequestTarget($requestTarget)
     {
         if (preg_match('#\s#', $requestTarget)) {
-            throw new InvalidArgumentException(
+            throw new \InvalidArgumentException(
                 'Invalid request target provided; cannot contain whitespace'
             );
         }
@@ -61,13 +83,19 @@ class Request extends    \PHPixie\HTTP\Messages\Message
         $new->requestTarget = $requestTarget;
         return $new;
     }
-    
+
+    /**
+     * @inheritdoc
+     */
     public function getMethod()
     {
         $this->requireMethod();
         return $this->method;
     }
-    
+
+    /**
+     * @inheritdoc
+     */
     public function withMethod($method)
     {
         $this->validateMethod($method);
@@ -76,13 +104,19 @@ class Request extends    \PHPixie\HTTP\Messages\Message
         $new->method = $method;
         return $new;
     }
-    
+
+    /**
+     * @inheritdoc
+     */
     public function getUri()
     {
         $this->requireUri();
         return $this->uri;
     }
-    
+
+    /**
+     * @inheritdoc
+     */
     public function withUri(UriInterface $uri, $preserveHost = false)
     {
         $new = clone $this;
@@ -93,21 +127,31 @@ class Request extends    \PHPixie\HTTP\Messages\Message
         
         return $new;
     }
-    
+
+    /**
+     * @param string $method
+     * @throws \InvalidArgumentException
+     */
     protected function validateMethod($method)
     {
         $method = strtoupper($method);
         
         if (!in_array($method, static::$validMethods, true)) {
-            throw new InvalidArgumentException("Unsupported HTTP method '$method' provided");
+            throw new \InvalidArgumentException("Unsupported HTTP method '$method' provided");
         }
     }
-    
+
+    /**
+     * @return void
+     */
     protected function requireMethod()
     {
         
     }
-    
+
+    /**
+     * @return void
+     */
     protected function requireUri()
     {
     

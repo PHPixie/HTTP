@@ -6,22 +6,48 @@ use Psr\Http\Message\StreamInterface;
 use Psr\Http\Message\MessageInterface;
 use InvalidArgumentException;
 
+/**
+ * Base PSR-7 Message implementation
+ */
 abstract class Message implements MessageInterface
 {
+    /**
+     * @var string
+     */
     protected $protocolVersion;
+
+    /**
+     * @var array
+     */
     protected $headers;
+
+    /**
+     * @var StreamInterface
+     */
     protected $body;
-    
+
+    /**
+     * @var bool
+     */
     protected $processedHeaders = false;
-    
+
+    /**
+     * @var array
+     */
     protected $headerNames = array();
-    
+
+    /**
+     * @inheritdoc
+     */
     public function getProtocolVersion()
     {
         $this->requireProtocolVersion();
         return $this->protocolVersion;
     }
 
+    /**
+     * @inheritdoc
+     */
     public function withProtocolVersion($version)
     {
         $new = clone $this;
@@ -29,12 +55,18 @@ abstract class Message implements MessageInterface
         return $new;
     }
 
+    /**
+     * @inheritdoc
+     */
     public function getHeaders()
     {
         $this->requireHeaders();
         return $this->headers;
     }
 
+    /**
+     * @inheritdoc
+     */
     public function hasHeader($header)
     {
         $this->requireHeaders();
@@ -42,6 +74,9 @@ abstract class Message implements MessageInterface
         return array_key_exists($lower, $this->headerNames);
     }
 
+    /**
+     * @inheritdoc
+     */
     public function getHeaderLine($header)
     {
         $this->requireHeaders();
@@ -54,6 +89,9 @@ abstract class Message implements MessageInterface
         return implode(',', $lines);
     }
 
+    /**
+     * @inheritdoc
+     */
     public function getHeader($header)
     {
         $this->requireHeaders();
@@ -67,16 +105,30 @@ abstract class Message implements MessageInterface
         return $this->headers[$normalized];
     }
 
+    /**
+     * @inheritdoc
+     */
     public function withHeader($header, $value)
     {
         return $this->modifyHeader($header, $value);
     }
 
+    /**
+     * @inheritdoc
+     */
     public function withAddedHeader($header, $value)
     {
         return $this->modifyHeader($header, $value, true);
     }
-    
+
+
+    /**
+     * @param string $header
+     * @param string|array $value
+     * @param bool $append
+     * @param bool $clone
+     * @return Message
+     */
     protected function modifyHeader($header, $value, $append = false, $clone = true)
     {
         $this->requireHeaders();
@@ -114,6 +166,9 @@ abstract class Message implements MessageInterface
         return $message;
     }
 
+    /**
+     * @inheritdoc
+     */
     public function withoutHeader($header)
     {
         $this->requireHeaders();
@@ -130,19 +185,28 @@ abstract class Message implements MessageInterface
         return $new;
     }
 
+    /**
+     * @inheritdoc
+     */
     public function getBody()
     {
         $this->requireBody();
         return $this->body;
     }
 
+    /**
+     * @inheritdoc
+     */
     public function withBody(StreamInterface $body)
     {
         $new = clone $this;
         $new->body = $body;
         return $new;
     }
-    
+
+    /**
+     * @return void
+     */
     protected function populateHeaderNames()
     {
         $headers = array_keys($this->headers);
@@ -150,7 +214,10 @@ abstract class Message implements MessageInterface
             $this->headerNames[strtolower($header)] = $header;
         }
     }
-    
+
+    /**
+     * @param array $headers
+     */
     protected function validateHeaders($headers)
     {
         foreach($headers as $name => $lines) {
@@ -159,7 +226,10 @@ abstract class Message implements MessageInterface
             }
         }
     }
-    
+
+    /**
+     * @return void
+     */
     protected function requireHeaders()
     {
         if(!$this->processedHeaders) {
@@ -167,12 +237,18 @@ abstract class Message implements MessageInterface
             $this->processedHeaders = true;
         }
     }
-    
+
+    /**
+     * @return void
+     */
     protected function requireProtocolVersion()
     {
     
     }
-    
+
+    /**
+     * @return void
+     */
     protected function requireBody()
     {
     

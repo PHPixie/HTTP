@@ -2,16 +2,31 @@
 
 namespace PHPixie\HTTP;
 
+/**
+ * Represents a HTTP context
+ * containing a request and cookie and session storages
+ */
 class Context
 {
+    /**
+     * @var Request
+     */
     protected $request;
+
+    /**
+     * @var Context\Cookies
+     */
     protected $cookies;
+
+    /**
+     * @var Context\Session
+     */
     protected $session;
 
     /**
      * @param Request $request
      * @param Context\Cookies $cookies
-     * @param Context\Session\SAPI $session
+     * @param Context\Session $session
      */
     public function __construct($request, $cookies, $session)
     {
@@ -21,6 +36,7 @@ class Context
     }
 
     /**
+     * HTTP request
      * @return Request
      */
     public function request()
@@ -29,6 +45,7 @@ class Context
     }
 
     /**
+     * Cookie storage
      * @return Context\Cookies
      */
     public function cookies()
@@ -37,7 +54,8 @@ class Context
     }
 
     /**
-     * @return Context\Session\SAPI
+     * Session storage
+     * @return Context\Session
      */
     public function session()
     {

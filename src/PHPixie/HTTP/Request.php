@@ -2,19 +2,50 @@
 
 namespace PHPixie\HTTP;
 
+use PHPixie\HTTP\Data\Headers;
+use Psr\Http\Message\ServerRequestInterface;
+use Psr\Http\Message\UriInterface;
+
+/**
+ * HTTP request representation
+ */
 class Request
 {
+    /**
+     * @var ServerRequestInterface
+     */
     protected $serverRequest;
+
+    /**
+     * @var array
+     */
     protected $dataMap = array();
+
+    /**
+     * @var array
+     */
     protected $dataMethods = array(
         'query'      => 'getQueryParams',
         'data'       => 'getParsedBody',
         'attributes' => 'getAttributes',
         'uploads'    => 'getUploadedFiles',
     );
+
+    /**
+     * @var \PHPixie\Slice\Data
+     */
     protected $server;
+
+    /**
+     * @var Headers
+     */
     protected $headers;
 
+    /**
+     * Constructor
+     * @param Builder $builder
+     * @param ServerRequestInterface $serverRequest
+     */
     public function __construct($builder, $serverRequest)
     {
         $this->builder       = $builder;
@@ -22,6 +53,7 @@ class Request
     }
 
     /**
+     * Query parameters (e.g. $_GET)
      * @return \PHPixie\Slice\Type\ArrayData
      */
     public function query()
@@ -30,6 +62,7 @@ class Request
     }
 
     /**
+     * Body parameters (e.g. $_POST)
      * @return \PHPixie\Slice\Type\ArrayData
      */
     public function data()
@@ -38,6 +71,7 @@ class Request
     }
 
     /**
+     * Additional attributes (e.g. routing data)
      * @return \PHPixie\Slice\Type\ArrayData
      */
     public function attributes()
@@ -46,6 +80,7 @@ class Request
     }
 
     /**
+     * Uploads data (e.g. $_FILES)
      * @return \PHPixie\Slice\Type\ArrayData
      */
     public function uploads()
@@ -54,6 +89,7 @@ class Request
     }
 
     /**
+     * Server data (e.g. $_SERVER)
      * @return \PHPixie\HTTP\Data\Server
      */
     public function server()
@@ -67,6 +103,7 @@ class Request
     }
 
     /**
+     * Headers
      * @return \PHPixie\HTTP\Data\Headers
      */
     public function headers()
@@ -80,7 +117,8 @@ class Request
     }
 
     /**
-     * @return \PHPixie\HTTP\Messages\Message\Request\ServerRequest\SAPI
+     * Get original PSR-7 ServerRequest
+     * @return ServerRequestInterface
      */
     public function serverRequest()
     {
@@ -88,6 +126,7 @@ class Request
     }
 
     /**
+     * Get HTTP method
      * @return string
      */
     public function method()
@@ -96,13 +135,18 @@ class Request
     }
 
     /**
-     * @return \PHPixie\HTTP\Messages\URI\SAPI
+     * PSR-7 URI of the request
+     * @return UriInterface
      */
     public function uri()
     {
         return $this->serverRequest->getUri();
     }
 
+    /**
+     * @param string $type
+     * @return \PHPixie\Slice\Type\ArrayData
+     */
     protected function getData($type)
     {
         if(!array_key_exists($type, $this->dataMap)) {

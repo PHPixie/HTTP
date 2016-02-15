@@ -2,12 +2,17 @@
 namespace PHPixie\HTTP\Messages\Message;
 
 use Psr\Http\Message\ResponseInterface;
-use Psr\Http\Message\UriInterface;
-use InvalidArgumentException;
+use Psr\Http\Message\StreamInterface;
 
+/**
+ * PSR-7 Response Implementation
+ */
 class Response extends    Implementation
               implements ResponseInterface
 {
+    /**
+     * @var array
+     */
     protected static $codePhrases = array(
         // INFORMATIONAL CODES
         100 => 'Continue',
@@ -82,7 +87,15 @@ class Response extends    Implementation
      * @var int
      */
     private $statusCode = 200;
-    
+
+    /**
+     * Constructor
+     * @param string $protocolVersion
+     * @param array $headers
+     * @param StreamInterface $body
+     * @param int $statusCode
+     * @param string|null $reasonPhrase
+     */
     public function __construct($protocolVersion, $headers, $body, $statusCode = 200, $reasonPhrase = null)
     {
         parent::__construct($protocolVersion, $headers, $body);
@@ -95,7 +108,11 @@ class Response extends    Implementation
         $this->statusCode   = $statusCode;
         $this->reasonPhrase = $reasonPhrase;
     }
-    
+
+    /**
+     * @param int $statusCode
+     * @return string|null
+     */
     protected function statusCodePhrase($statusCode)
     {
         if(array_key_exists($statusCode, static::$codePhrases)) {
@@ -103,18 +120,27 @@ class Response extends    Implementation
         }
         
         return null;
-    }    
-    
+    }
+
+    /**
+     * @inheritdoc
+     */
     public function getStatusCode()
     {
         return $this->statusCode;
     }
-    
+
+    /**
+     * @inheritdoc
+     */
     public function getReasonPhrase()
     {
         return $this->reasonPhrase;
     }
-    
+
+    /**
+     * @inheritdoc
+     */
     public function withStatus($code, $reasonPhrase = null)
     {
         $this->validateStatusCode($code);
@@ -128,10 +154,14 @@ class Response extends    Implementation
         return $new;
     }
 
+    /**
+     * @param int $code
+     * @throws \InvalidArgumentException
+     */
     protected function validateStatusCode($code)
     {
         if ($code < 100 || $code > 599) {
-            throw new InvalidArgumentException("Invalid status '$code', must be between 100 and 599");
+            throw new \InvalidArgumentException("Invalid status '$code', must be between 100 and 599");
         }
     }
 }

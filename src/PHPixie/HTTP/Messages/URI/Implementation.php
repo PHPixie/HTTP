@@ -1,8 +1,15 @@
 <?php
 namespace PHPixie\HTTP\Messages\URI;
 
+/**
+ * PSR-7 URI Implementation
+ */
 class Implementation extends \PHPixie\HTTP\Messages\URI
 {
+    /**
+     * Constructor
+     * @param string $uri
+     */
     public function __construct($uri)
     {
         $parts = parse_url($uri);

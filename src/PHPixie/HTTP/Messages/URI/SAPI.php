@@ -2,15 +2,28 @@
 
 namespace PHPixie\HTTP\Messages\URI;
 
+/**
+ * URI implementation based on $_SERVER
+ */
 class SAPI extends \PHPixie\HTTP\Messages\URI
 {
+    /**
+     * @var array
+     */
     protected $server;
-    
+
+    /**
+     * Constructor
+     * @param array $server
+     */
     public function __construct($server)
     {
         $this->server = $server;
     }
-    
+
+    /**
+     * @param string $name
+     */
     protected function requirePart($name)
     {
         switch($name) {
@@ -35,7 +48,10 @@ class SAPI extends \PHPixie\HTTP\Messages\URI
                 parent::requirePart($name);
         }
     }
-    
+
+    /**
+     * @return void
+     */
     protected function requireScheme()
     {
         $scheme = 'http';
@@ -45,7 +61,10 @@ class SAPI extends \PHPixie\HTTP\Messages\URI
         
         $this->parts['scheme'] = $scheme;
     }
-    
+
+    /**
+     * @return void
+     */
     protected function requirePath()
     {
         $path = $this->server['REQUEST_URI'];
@@ -57,13 +76,19 @@ class SAPI extends \PHPixie\HTTP\Messages\URI
         
         $this->parts['path'] = $this->normalizePath($path);
     }
-    
+
+    /**
+     * @return void
+     */
     protected function requireQuery()
     {
         $query = ltrim($this->server['QUERY_STRING'], '?');
         $this->parts['query'] = $this->normalizeQuery($query);
     }
-    
+
+    /**
+     * @return void
+     */
     protected function requireHostAndPort()
     {
         $host = $this->server['HTTP_HOST'];

@@ -6,28 +6,17 @@ use InvalidArgumentException;
 use Psr\Http\Message\UriInterface;
 
 /**
- * Implementation of Psr\Http\UriInterface.
- *
- * Provides a value object representing a URI for HTTP requests.
- *
- * Instances of this class  are considered immutable; all methods that
- * might change state are implemented such that they retain the internal
- * state of the current instance and return a new instance that contains the
- * changed state.
+ * Base PSR-7 URI implementation
  */
 abstract class URI implements UriInterface
 {
     /**
-     * Sub-delimiters used in query strings and fragments.
-     *
-     * @const string
+     * @var string
      */
     const CHAR_SUB_DELIMS = '!\$&\'\(\)\*\+,;=';
 
     /**
-     * Unreserved characters used in paths, query strings, and fragments.
-     *
-     * @const string
+     * @var string
      */
     const CHAR_UNRESERVED = 'a-zA-Z0-9_\-\.~';
 
@@ -37,8 +26,14 @@ abstract class URI implements UriInterface
      */
     protected $uriString;
 
+    /**
+     * @var array
+     */
     protected $parts = array();
 
+    /**
+     * @inheritdoc
+     */
     public function __toString()
     {
         if ($this->uriString === null) {
@@ -66,6 +61,9 @@ abstract class URI implements UriInterface
         return $this->uriString;
     }
 
+    /**
+     * @inheritdoc
+     */
     public function getAuthority()
     {
         $authority = '';
@@ -83,21 +81,33 @@ abstract class URI implements UriInterface
         return $authority;
     }
 
+    /**
+     * @inheritdoc
+     */
     public function getScheme()
     {
         return $this->part('scheme');
     }
 
+    /**
+     * @inheritdoc
+     */
     public function getUserInfo()
     {
         return $this->part('userInfo');
     }
 
+    /**
+     * @inheritdoc
+     */
     public function getHost()
     {
         return $this->part('host');
     }
 
+    /**
+     * @inheritdoc
+     */
     public function getPort()
     {
         $port = $this->part('port');
@@ -109,21 +119,33 @@ abstract class URI implements UriInterface
         return $port;
     }
 
+    /**
+     * @inheritdoc
+     */
     public function getPath()
     {
         return $this->part('path');
     }
 
+    /**
+     * @inheritdoc
+     */
     public function getQuery()
     {
         return $this->part('query');
     }
 
+    /**
+     * @inheritdoc
+     */
     public function getFragment()
     {
         return $this->part('fragment');
     }
 
+    /**
+     * @inheritdoc
+     */
     public function withScheme($scheme)
     {
         $scheme = strtolower($scheme);
@@ -136,6 +158,9 @@ abstract class URI implements UriInterface
         return $this->updatePart('scheme', $scheme);
     }
 
+    /**
+     * @inheritdoc
+     */
     public function withUserInfo($user, $password = null)
     {
         $userInfo = $this->normalizePart($user);
@@ -147,6 +172,11 @@ abstract class URI implements UriInterface
         return $this->updatePart('userInfo', $userInfo);
     }
 
+    /**
+     * @param string $key
+     * @param string $value
+     * @return URI
+     */
     protected function updatePart($key, $value)
     {
         $new = clone $this;
@@ -156,12 +186,18 @@ abstract class URI implements UriInterface
         return $new;
     }
 
+    /**
+     * @inheritdoc
+     */
     public function withHost($host)
     {
         $host = $this->normalizePart($host);
         return $this->updatePart('host', $host);
     }
 
+    /**
+     * @inheritdoc
+     */
     public function withPort($port)
     {
         if($port !== null) {
@@ -179,12 +215,18 @@ abstract class URI implements UriInterface
         return $this->updatePart('port', $port);
     }
 
+    /**
+     * @inheritdoc
+     */
     public function withPath($path)
     {
         $path = $this->normalizePath($path);
         return $this->updatePart('path', $path);
     }
 
+    /**
+     * @inheritdoc
+     */
     public function withQuery($query)
     {
         $query = $this->normalizeQuery($query);
@@ -192,18 +234,30 @@ abstract class URI implements UriInterface
 
     }
 
+    /**
+     * @inheritdoc
+     */
     public function withFragment($fragment)
     {
         $fragment = $this->normalizeFragment($fragment);
         return $this->updatePart('fragment', $fragment);
     }
 
+    /**
+     * @param string $fragment
+     * @return string
+     */
     protected function normalizeFragment($fragment)
     {
         $fragment = $this->normalizePart($fragment, '#');
         return $this->normalizeQueryString($fragment);
     }
 
+    /**
+     * @param string $part
+     * @param string|null $prefix
+     * @return string
+     */
     protected function normalizePart($part, $prefix = null) {
         if($part === null || $part === '') {
             return '';
@@ -217,10 +271,7 @@ abstract class URI implements UriInterface
     }
 
     /**
-     * Is a given port non-standard for the current scheme?
-     *
      * @param string $scheme
-     * @param string $host
      * @param int $port
      * @return bool
      */
@@ -238,8 +289,6 @@ abstract class URI implements UriInterface
     }
 
     /**
-     * Filters the path of a URI to ensure it is properly encoded.
-     *
      * @param string $path
      * @return string
      */
@@ -269,12 +318,9 @@ abstract class URI implements UriInterface
     }
 
     /**
-     * Filter a query string to ensure it is propertly encoded.
-     *
-     * Ensures that the values in the query string are properly urlencoded.
-     *
      * @param string $query
      * @return string
+     * @throws InvalidArgumentException
      */
     protected function normalizeQuery($query)
     {
@@ -301,8 +347,6 @@ abstract class URI implements UriInterface
     }
 
     /**
-     * Filter a query string key or value, or a fragment.
-     *
      * @param string $value
      * @return string
      */
@@ -315,10 +359,18 @@ abstract class URI implements UriInterface
         );
     }
 
+    /**
+     * @param array $matches
+     * @return string
+     */
     protected function encodeMatchedQueryPart($matches) {
         return rawurlencode($matches[0]);
     }
 
+    /**
+     * @param string $name
+     * @return string
+     */
     protected function part($name)
     {
         if(!array_key_exists($name, $this->parts)) {
@@ -328,6 +380,9 @@ abstract class URI implements UriInterface
         return $this->parts[$name];
     }
 
+    /**
+     * @param string $name
+     */
     protected function requirePart($name)
     {
         if($name === 'port') {

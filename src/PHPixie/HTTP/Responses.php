@@ -1,17 +1,30 @@
 <?php
 
 namespace PHPixie\HTTP;
+use PHPixie\HTTP\Data\Headers;
+use Psr\Http\Message\StreamInterface;
 
+/**
+ * Response factory.
+ */
 class Responses
 {
+    /**
+     * @var Builder
+     */
     protected $builder;
-    
+
+    /**
+     * Constructor
+     * @param Builder $builder
+     */
     public function __construct($builder)
     {
         $this->builder = $builder;   
     }
 
     /**
+     * Response with a string body
      * @param $string
      * @return Responses\Response
      */
@@ -21,7 +34,8 @@ class Responses
     }
 
     /**
-     * @param     $url
+     * Redirect to a different url
+     * @param $url
      * @param int $statusCode
      * @return Responses\Response
      */
@@ -37,7 +51,10 @@ class Responses
     }
 
     /**
-     * @param $data
+     * JSON response
+     *
+     * Data will be automatically encoded to JSON
+     * @param mixed $data
      * @return Responses\Response
      */
     public function json($data)
@@ -55,7 +72,8 @@ class Responses
     }
 
     /**
-     * @param $file
+     * Stream a file to the client
+     * @param resource $file
      * @return Responses\Response
      */
     public function streamFile($file)
@@ -65,9 +83,10 @@ class Responses
     }
 
     /**
-     * @param $fileName
-     * @param $contentType
-     * @param $contents
+     * Download of contents as file
+     * @param string $fileName
+     * @param string $contentType
+     * @param string $contents
      * @return Responses\Response
      */
     public function download($fileName, $contentType, $contents)
@@ -77,9 +96,10 @@ class Responses
     }
 
     /**
-     * @param $fileName
-     * @param $contentType
-     * @param $file
+     * Download of a local file
+     * @param string $fileName
+     * @param string $contentType
+     * @param resource $file
      * @return Responses\Response
      */
     public function downloadFile($fileName, $contentType, $file)
@@ -89,10 +109,11 @@ class Responses
     }
 
     /**
-     * @param       $body
+     * Build a response
+     * @param StreamInterface $body
      * @param array $headerArray
-     * @param int   $statusCode
-     * @param null  $reasonPhrase
+     * @param int $statusCode
+     * @param string $reasonPhrase Status phrase
      * @return Responses\Response
      */
     public function response($body, $headerArray = array(), $statusCode = 200, $reasonPhrase = null)
@@ -100,13 +121,28 @@ class Responses
         $headers = $this->builder->editableHeaders($headerArray);
         return $this->buildResponse($headers, $body, $statusCode, $reasonPhrase);
     }
-    
-    protected function stringResponse($string, $headers = array(), $statusCode = 200)
+
+    /**
+     * Build a string response
+     * @param $string
+     * @param array $headers
+     * @param int $statusCode
+     * @param string $reasonPhrase Status phrase
+     * @return Responses\Response
+     */
+    protected function stringResponse($string, $headers = array(), $statusCode = 200, $reasonPhrase = null)
     {
         $body = $this->builder->messages()->stringStream($string);
-        return $this->response($body, $headers, $statusCode);
+        return $this->response($body, $headers, $statusCode, $reasonPhrase);
     }
-    
+
+    /**
+     * Build a download response
+     * @param string $fileName
+     * @param string $contentType
+     * @param StreamInterface $body
+     * @return Responses\Response
+     */
     protected function downloadResponse($fileName, $contentType, $body)
     {
         $headers = array(
@@ -116,7 +152,14 @@ class Responses
         
         return $this->response($body, $headers);
     }
-    
+
+    /**
+     * @param Headers $headers
+     * @param StreamInterface $body
+     * @param int $statusCode
+     * @param string $reasonPhrase
+     * @return Responses\Response
+     */
     protected function buildResponse($headers, $body, $statusCode = 200, $reasonPhrase = null)
     {
         $messages = $this->builder->messages();

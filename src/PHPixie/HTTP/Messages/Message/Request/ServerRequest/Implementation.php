@@ -2,8 +2,28 @@
 
 namespace PHPixie\HTTP\Messages\Message\Request\ServerRequest;
 
+use Psr\Http\Message\StreamInterface;
+use Psr\Http\Message\UriInterface;
+
+/**
+ * PSR-7 ServerRequest implementation
+ */
 class Implementation extends \PHPixie\HTTP\Messages\Message\Request\ServerRequest
 {
+    /**
+     * Constructor
+     * @param string $protocolVersion
+     * @param array $headers
+     * @param StreamInterface $body
+     * @param string $method
+     * @param UriInterface $uri
+     * @param array $serverParams
+     * @param array $queryParams
+     * @param mixed $parsedBody
+     * @param array $cookieParams
+     * @param array $uploadedFiles
+     * @param array $attributes
+     */
     public function __construct(
         $protocolVersion,
         $headers,

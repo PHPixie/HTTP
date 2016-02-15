@@ -5,24 +5,63 @@ namespace PHPixie\HTTP\Messages\Stream;
 use Psr\Http\Message\StreamInterface;
 use RuntimeException;
 
+/**
+ * PSR-7 Stream implementation
+ */
 class Implementation implements StreamInterface
 {
+    /**
+     * @var string
+     */
     protected $uri;
+
+    /**
+     * @var string
+     */
     protected $mode;
-    
+
+    /**
+     * @var resource
+     */
     protected $resource;
+
+    /**
+     * @var bool
+     */
     protected $processed = false;
-    
+
+    /**
+     * @var bool
+     */
     protected $isReadable;
+
+    /**
+     * @var bool
+     */
     protected $isWritable;
+
+    /**
+     * @var bool
+     */
     protected $isSeekable;
-        
+
+    /**
+     * Constructor
+     * @param string $uri Resource URI
+     * @param string $mode File mode
+     */
     public function __construct($uri, $mode = 'r')
     {
         $this->uri = $uri;
         $this->mode = $mode;
     }
-    
+
+    /**
+     * @param bool $throwIfDetached Whether to throw
+     *     an exception if resource was detached
+     * @return resource
+     * @throws RuntimeException
+     */
     public function resource($throwIfDetached = false)
     {
         if(!$this->processed) {
@@ -41,6 +80,9 @@ class Implementation implements StreamInterface
         return $this->resource;
     }
 
+    /**
+     * @inheritdoc
+     */
     public function __toString()
     {
         if(($resource = $this->resource()) === null) {
@@ -49,7 +91,10 @@ class Implementation implements StreamInterface
         
         return stream_get_contents($resource, -1, 0);
     }
-    
+
+    /**
+     * @inheritdoc
+     */
     public function close()
     {
         $resource = $this->detach();
@@ -58,7 +103,10 @@ class Implementation implements StreamInterface
             fclose($resource);
         }
     }
-    
+
+    /**
+     * @inheritdoc
+     */
     public function detach()
     {
         $resource = $this->resource();
@@ -66,6 +114,9 @@ class Implementation implements StreamInterface
         return $resource;
     }
 
+    /**
+     * @inheritdoc
+     */
     public function getSize()
     {
         if(($resource = $this->resource()) === null) {
@@ -75,12 +126,18 @@ class Implementation implements StreamInterface
         $stats = fstat($resource);
         return $stats['size'];
     }
-    
+
+    /**
+     * @inheritdoc
+     */
     public function tell()
     {
         return ftell($this->resource(true));
     }
-    
+
+    /**
+     * @inheritdoc
+     */
     public function eof()
     {
         if(($resource = $this->resource()) === null) {
@@ -89,7 +146,10 @@ class Implementation implements StreamInterface
         
         return feof($resource);
     }
-    
+
+    /**
+     * @inheritdoc
+     */
     public function isSeekable()
     {
         if(($resource = $this->resource()) === null) {
@@ -103,7 +163,10 @@ class Implementation implements StreamInterface
         
         return $this->isSeekable;
     }
-    
+
+    /**
+     * @inheritdoc
+     */
     public function isWritable()
     {
         if(($resource = $this->resource()) === null) {
@@ -117,7 +180,10 @@ class Implementation implements StreamInterface
         
         return $this->isWritable;
     }
-    
+
+    /**
+     * @inheritdoc
+     */
     public function isReadable()
     {
         if(($resource = $this->resource()) === null) {
@@ -133,6 +199,9 @@ class Implementation implements StreamInterface
         return $this->isReadable;
     }
 
+    /**
+     * @inheritdoc
+     */
     public function seek($offset, $whence = SEEK_SET)
     {
         if(!$this->isSeekable()) {
@@ -141,12 +210,18 @@ class Implementation implements StreamInterface
         
         fseek($this->resource(), $offset, $whence);
     }
-    
+
+    /**
+     * @inheritdoc
+     */
     public function rewind()
     {
         $this->seek(0);
     }
-    
+
+    /**
+     * @inheritdoc
+     */
     public function write($string)
     {
         if(!$this->isWritable()) {
@@ -155,7 +230,10 @@ class Implementation implements StreamInterface
         
         return fwrite($this->resource(), $string);
     }
-    
+
+    /**
+     * @inheritdoc
+     */
     public function read($length)
     {
         if(!$this->isReadable()) {
@@ -164,12 +242,18 @@ class Implementation implements StreamInterface
         
         return fread($this->resource(), $length);
     }
-    
+
+    /**
+     * @inheritdoc
+     */
     public function getContents()
     {
         return stream_get_contents($this->resource(true));
     }
-    
+
+    /**
+     * @inheritdoc
+     */
     public function getMetadata($key = null)
     {
         if(($resource = $this->resource()) === null) {

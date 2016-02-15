@@ -2,11 +2,33 @@
 
 namespace PHPixie\HTTP\Messages\Message\Request\ServerRequest;
 
+use PHPixie\HTTP\Messages;
+
+/**
+ * PSR-7 ServerRequest from PHP globals data
+ */
 class SAPI extends \PHPixie\HTTP\Messages\Message\Request\ServerRequest
 {
+    /**
+     * @var Messages
+     */
     protected $messages;
+
+    /**
+     * @var array
+     */
     protected $fileParams;
-    
+
+    /**
+     * Constructor
+     * @param Messages $messages
+     * @param array $server
+     * @param array $get
+     * @param array $post
+     * @param array $cookies
+     * @param array $files
+     * @param array $attributes
+     */
     public function __construct($messages, $server, $get, $post, $cookies, $files, $attributes = array())
     {
         $this->messages     = $messages;
@@ -20,14 +42,20 @@ class SAPI extends \PHPixie\HTTP\Messages\Message\Request\ServerRequest
         
         $this->method       = $server['REQUEST_METHOD'];
     }
-    
+
+    /**
+     * @inheritdoc
+     */
     protected function requireProtocolVersion()
     {
         if($this->protocolVersion === null) {
             $this->protocolVersion = substr($this->serverParams['SERVER_PROTOCOL'], 5);
         }
     }
-    
+
+    /**
+     * @inheritdoc
+     */
     protected function requireHeaders()
     {
         if($this->processedHeaders) {
@@ -58,7 +86,10 @@ class SAPI extends \PHPixie\HTTP\Messages\Message\Request\ServerRequest
         
         $this->processedHeaders = true;
     }
-    
+
+    /**
+     * @inheritdoc
+     */
     protected function requireUploadedFiles()
     {
         if($this->uploadedFiles !== null) {
@@ -90,6 +121,10 @@ class SAPI extends \PHPixie\HTTP\Messages\Message\Request\ServerRequest
         $this->uploadedFiles = $uploadedFiles;
     }
 
+    /**
+     * @param string $header
+     * @return string
+     */
     protected function normalizeHeaderName($header)
     {
         $header = strtolower($header);
@@ -98,14 +133,20 @@ class SAPI extends \PHPixie\HTTP\Messages\Message\Request\ServerRequest
         $header = str_replace(' ', '-', $header);
         return $header;
     }
-    
+
+    /**
+     * @inheritdoc
+     */
     protected function requireBody()
     {
         if($this->body === null) {
             $this->body = $this->messages->stream('php://input');
         }
     }
-    
+
+    /**
+     * @inheritdoc
+     */
     protected function requireUri()
     {
         if($this->uri === null) {

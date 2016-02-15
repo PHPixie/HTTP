@@ -2,17 +2,30 @@
 
 namespace PHPixie;
 
+use PHPixie\HTTP\Messages\Message\Request;
+
+/**
+ * HTTP component
+ */
 class HTTP
 {
+    /**
+     * @var HTTP\Builder
+     */
     protected $builder;
-    
+
+    /**
+     * Constructor
+     * @param Slice $slice
+     */
     public function __construct($slice)
     {
         $this->builder = $this->buildBuilder($slice);
     }
 
     /**
-     * @return HTTP\Messages\Message\Request\ServerRequest\SAPI
+     * Create a PSR 7 ServerRequest from globals
+     * @return Request\ServerRequest\SAPI
      */
     public function sapiServerRequest()
     {
@@ -20,20 +33,26 @@ class HTTP
     }
 
     /**
-     * @param HTTP\Messages\Message\Request\ServerRequest $serverRequest
+     * Create PHPixie request from server request.
+     *
+     * If the server request is not specified it will be created
+     * from globals
+     * @param Request\ServerRequest $serverRequest
      * @return HTTP\Request
      */
     public function request($serverRequest = null)
     {
-        if($serverRequest === null) {
+        if ($serverRequest === null) {
             $serverRequest = $this->sapiServerRequest();
         }
         return $this->builder->request($serverRequest);
     }
 
     /**
+     * Output a HTTP response
      * @param HTTP\Responses\Response $response
-     * @param HTTP\Context $context
+     * @param HTTP\Context $context Optional HTTP context to use (e.g. for cookie data)
+     * @return void
      */
     public function output($response, $context = null)
     {
@@ -41,7 +60,9 @@ class HTTP
     }
 
     /**
+     * Output a PSR-7 response message
      * @param HTTP\Responses\Response $responseMessage
+     * @return void
      */
     public function outputResponseMessage($responseMessage)
     {
@@ -49,8 +70,10 @@ class HTTP
     }
 
     /**
+     * Create a context from a HTTP request
      * @param HTTP\Request $request
-     * @param HTTP\Context\Session\SAPI $session
+     * @param HTTP\Context\Session $session Optional session container,
+     *        if not specified the default PHP session storage is used
      * @return HTTP\Context
      */
     public function context($request, $session = null)
@@ -58,14 +81,15 @@ class HTTP
         $serverRequest = $request->serverRequest();
         $cookieArray = $serverRequest->getCookieParams();
         $cookies = $this->builder->cookies($cookieArray);
-        if($session === null) {
+        if ($session === null) {
             $session = $this->builder->sapiSession();
         }
-        
+
         return $this->builder->context($request, $cookies, $session);
     }
 
     /**
+     * Create a context container
      * @param HTTP\Context $context
      * @return HTTP\Context\Container\Implementation
      */
@@ -75,6 +99,7 @@ class HTTP
     }
 
     /**
+     * Message factory
      * @return HTTP\Messages
      */
     public function messages()
@@ -83,6 +108,7 @@ class HTTP
     }
 
     /**
+     * Response factory
      * @return HTTP\Responses
      */
     public function responses()
@@ -91,13 +117,18 @@ class HTTP
     }
 
     /**
+     * Get internal factory
      * @return HTTP\Builder
      */
     public function builder()
     {
         return $this->builder;
     }
-    
+
+    /**
+     * @param Slice $slice
+     * @return HTTP\Builder
+     */
     protected function buildBuilder($slice)
     {
         return new HTTP\Builder($slice);

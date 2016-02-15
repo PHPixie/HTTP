@@ -2,16 +2,33 @@
 
 namespace PHPixie\HTTP;
 
+use PHPixie\Slice;
+
+/**
+ * HTTP factory
+ */
 class Builder
 {
+    /**
+     * @var Slice
+     */
     protected $slice;
+
+    /**
+     * @var array
+     */
     protected $instances = array();
-    
+
+    /**
+     * Builder constructor
+     * @param Slice $slice
+     */
     public function __construct($slice) {
         $this->slice = $slice;
     }
 
     /**
+     * Message factory
      * @return Messages
      */
     public function messages()
@@ -20,6 +37,7 @@ class Builder
     }
 
     /**
+     * Response factory
      * @return Responses
      */
     public function responses()
@@ -28,6 +46,7 @@ class Builder
     }
 
     /**
+     * Output
      * @return Output
      */
     public function output()
@@ -36,8 +55,9 @@ class Builder
     }
 
     /**
+     * Build PHPixie request from PSR-7 ServerRequest
      * @param $serverRequest
-     * @return \PHPixie\HTTP\Request
+     * @return Request
      */
     public function request($serverRequest)
     {
@@ -45,8 +65,9 @@ class Builder
     }
 
     /**
+     * Proxy for building slice data
      * @param array $array
-     * @return mixed
+     * @return Slice\Type\ArrayData
      */
     public function data($array = array())
     {
@@ -54,6 +75,7 @@ class Builder
     }
 
     /**
+     * Build headers storage
      * @param array $headerArray
      * @return Data\Headers
      */
@@ -63,6 +85,7 @@ class Builder
     }
 
     /**
+     * Build editable headers storage
      * @param array $headerArray
      * @return Data\Headers\Editable
      */
@@ -72,6 +95,7 @@ class Builder
     }
 
     /**
+     * Build server data storage
      * @param array $serverData
      * @return Data\Server
      */
@@ -81,6 +105,7 @@ class Builder
     }
 
     /**
+     * Build HTTP context
      * @param Request $request
      * @param Context\Cookies $cookies
      * @param Context\Session\SAPI $session
@@ -92,6 +117,7 @@ class Builder
     }
 
     /**
+     * Build cookie storage
      * @param array $cookieArray
      * @return Context\Cookies
      */
@@ -101,6 +127,7 @@ class Builder
     }
 
     /**
+     * Build default session storage
      * @return Context\Session\SAPI
      */
     public function sapiSession()
@@ -109,6 +136,7 @@ class Builder
     }
 
     /**
+     * Build a single cookie update
      * @param            $name
      * @param            $value
      * @param null       $expires
@@ -140,6 +168,7 @@ class Builder
     }
 
     /**
+     * Build context container
      * @param $context
      * @return Context\Container\Implementation
      */
@@ -147,7 +176,11 @@ class Builder
     {
         return new Context\Container\Implementation($context);
     }
-    
+
+    /**
+     * @param $name
+     * @return mixed
+     */
     protected function instance($name)
     {
         if(!array_key_exists($name, $this->instances)) {
@@ -157,17 +190,26 @@ class Builder
         
         return $this->instances[$name];
     }
-    
+
+    /**
+     * @return Messages
+     */
     protected function buildMessages()
     {
         return new Messages();
     }
-    
+
+    /**
+     * @return Responses
+     */
     protected function buildResponses()
     {
         return new Responses($this);
     }
-    
+
+    /**
+     * @return Output
+     */
     protected function buildOutput()
     {
         return new Output();
