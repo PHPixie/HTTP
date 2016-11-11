@@ -68,7 +68,7 @@ class ResponsesTest extends \PHPixie\Test\Testcase
     public function testJson()
     {
         $data = array('a' => 1);
-        $string = json_encode($data);
+        $string = json_encode($data, JSON_UNESCAPED_UNICODE);
         
         $response = $this->prepareStringResponse(
             $string,
