@@ -59,7 +59,7 @@ class Responses
      */
     public function json($data)
     {
-        $string = json_encode($data);
+        $string = json_encode($data, JSON_UNESCAPED_UNICODE);
         
         return $this->stringResponse(
             $string,
