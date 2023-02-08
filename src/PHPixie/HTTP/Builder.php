@@ -137,13 +137,14 @@ class Builder
 
     /**
      * Build a single cookie update
-     * @param            $name
-     * @param            $value
-     * @param null       $expires
-     * @param string     $path
-     * @param null       $domain
-     * @param bool       $secure
-     * @param bool       $httpOnly
+     * @param string      $name
+     * @param mixed       $value
+     * @param int|null    $expires
+     * @param string      $path
+     * @param string|null $domain
+     * @param bool        $secure
+     * @param bool        $httpOnly
+     * @param string|null $sameSite
      * @return Context\Cookies\Update
      */
     public function cookiesUpdate(
@@ -153,7 +154,8 @@ class Builder
         $path = '/',
         $domain = null,
         $secure = false,
-        $httpOnly = false
+        $httpOnly = false,
+        $sameSite = null
     )
     {
         return new Context\Cookies\Update(
@@ -163,8 +165,9 @@ class Builder
             $path,
             $domain,
             $secure,
-            $httpOnly
-        );    
+            $httpOnly,
+            $sameSite
+        );
     }
 
     /**
@@ -187,7 +190,7 @@ class Builder
             $method = 'build'.ucfirst($name);
             $this->instances[$name] = $this->$method();
         }
-        
+
         return $this->instances[$name];
     }
 

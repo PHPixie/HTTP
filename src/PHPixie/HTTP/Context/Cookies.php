@@ -42,10 +42,10 @@ class Cookies
      */
     public function get($name, $default = null)
     {
-        if($this->exists($name)) {
+        if ($this->exists($name)) {
             return $this->cookies[$name];
         }
-        
+
         return $default;
     }
 
@@ -57,10 +57,10 @@ class Cookies
      */
     public function getRequired($name)
     {
-        if($this->exists($name)) {
+        if ($this->exists($name)) {
             return $this->cookies[$name];
         }
-        
+
         throw new \PHPixie\HTTP\Exception("Cookie '$name' is not set");
     }
 
@@ -68,13 +68,14 @@ class Cookies
      * Set cookie
      *
      * See the PHP setcookie() function for more details
-     * @param string $name
-     * @param mixed $value
-     * @param int|null $lifetime
-     * @param string|null $path
+     * @param string      $name
+     * @param mixed       $value
+     * @param int|null    $lifetime
+     * @param string      $path
      * @param string|null $domain
-     * @param boolean $secure
-     * @param bool $httpOnly
+     * @param bool        $secure
+     * @param bool        $httpOnly
+     * @param string|null $sameSite
      * @return void
      */
     public function set(
@@ -84,23 +85,22 @@ class Cookies
         $path = '/',
         $domain = null,
         $secure = false,
-        $httpOnly = false
+        $httpOnly = false,
+        $sameSite = null
     )
     {
-        if($lifetime !== null) {
+        if ($lifetime !== null) {
             $expires = time() + $lifetime;
-            
-        }else{
+        } else {
             $expires = null;
         }
-        
-        if($lifetime < 0) {
+
+        if ($lifetime < 0) {
             unset($this->cookies[$name]);
-            
-        }else {
-            $this->cookies[$name] = $value;            
+        } else {
+            $this->cookies[$name] = $value;
         }
-        
+
         $this->updates[$name] = $this->builder->cookiesUpdate(
             $name,
             $value,
@@ -108,7 +108,8 @@ class Cookies
             $path,
             $domain,
             $secure,
-            $httpOnly
+            $httpOnly,
+            $sameSite
         );
     }
 
