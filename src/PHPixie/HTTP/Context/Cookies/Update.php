@@ -43,14 +43,20 @@ class Update {
     protected $httpOnly;
 
     /**
+     * @var string|null
+     */
+    protected $sameSite;
+
+    /**
      * Constructor
-     * @param string $name
-     * @param mixed $value
-     * @param int|null $expires
-     * @param string $path
+     * @param string      $name
+     * @param mixed       $value
+     * @param int|null    $expires
+     * @param string      $path
      * @param string|null $domain
-     * @param bool $secure
-     * @param bool $httpOnly
+     * @param bool        $secure
+     * @param bool        $httpOnly
+     * @param string|null $sameSite
      */
     public function __construct(
         $name,
@@ -59,7 +65,8 @@ class Update {
         $path = '/',
         $domain = null,
         $secure = false,
-        $httpOnly = false
+        $httpOnly = false,
+        $sameSite = null
     )
     {
         $this->name     = $name;
@@ -69,6 +76,7 @@ class Update {
         $this->domain   = $domain;
         $this->secure   = $secure;
         $this->httpOnly = $httpOnly;
+        $this->sameSite = in_array(strtolower($sameSite), ['lax', 'strict', 'none']) ? $sameSite : null;
     }
 
     /**
@@ -135,33 +143,46 @@ class Update {
     }
 
     /**
+     * Same site "flag"
+     * @return null|string
+     */
+    public function sameSite()
+    {
+        return $this->sameSite;
+    }
+
+    /**
      * Get header representation
      * @return string
      */
     public function asHeader()
     {
-        $header = urlencode($this->name).'='.urlencode((string) $this->value);
-        
-        if($this->domain !== null) {
-            $header.= '; domain='.$this->domain;
+        $header = urlencode($this->name) . '=' . urlencode((string) $this->value);
+
+        if ($this->domain !== null) {
+            $header .= '; domain=' . $this->domain;
         }
-        
-        if($this->path !== null) {
-            $header.= '; path='.$this->path;
+
+        if ($this->path !== null) {
+            $header .= '; path=' . $this->path;
         }
-        
-        if($this->expires !== null) {
-            $header.= '; expires=' . gmdate('D, d-M-Y H:i:s e', $this->expires);
+
+        if ($this->expires !== null) {
+            $header .= '; expires=' . gmdate('D, d-M-Y H:i:s e', $this->expires);
         }
-        
-        if($this->secure) {
-            $header.= '; secure';
+
+        if ($this->secure) {
+            $header .= '; secure';
         }
-        
-        if($this->httpOnly) {
-            $header.= '; HttpOnly';
+
+        if ($this->httpOnly) {
+            $header .= '; HttpOnly';
         }
-        
+
+        if ($this->sameSite) {
+            $header .= '; SameSite=' . $this->sameSite;
+        }
+
         return $header;
     }
 }
